@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { nanoid } from 'nanoid';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { db, auth } from '@/src/firebase';
 
 export type BlockType = 'hero' | 'text' | 'button' | 'image' | 'grid' | 'card' | 'pricing' | 'contact' | 'features' | 'testimonials' | 'faq' | 'navbar' | 'footer';
 export type AiAnimationType = 'zero-g' | 'singularity' | 'magnetic' | 'none';
@@ -34,6 +36,8 @@ interface BuilderState {
   setTheme: (theme: ThemeType) => void;
   setWpConfig: (config: Partial<BuilderState['wpConfig']>) => void;
   duplicateBlock: (id: string) => void;
+  saveProject: (name: string) => Promise<void>;
+  loadProject: (id: string) => Promise<void>;
 }
 
 const DEFAULT_PROPS: Record<BlockType, any> = {
@@ -87,7 +91,7 @@ const DEFAULT_PROPS: Record<BlockType, any> = {
 
 export const useBuilderStore = create<BuilderState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       blocks: [
         { id: nanoid(), type: 'hero', props: DEFAULT_PROPS.hero },
         { id: nanoid(), type: 'text', props: DEFAULT_PROPS.text },
@@ -136,6 +140,29 @@ export const useBuilderStore = create<BuilderState>()(
       setWpConfig: (config) => set((state) => ({
         wpConfig: { ...state.wpConfig, ...config }
       })),
+      saveProject: async (name: string) => {
+        const user = auth.currentUser;
+        if (!user) throw new Error('User not authenticated');
+        const projectId = nanoid();
+        const project = {
+          id: projectId,
+          userId: user.uid,
+          name,
+          blocks: get().blocks,
+          createdAt: new Date().toISOString(),
+        };
+        await setDoc(doc(db, 'users', user.uid, 'projects', projectId), project);
+      },
+      loadProject: async (id: string) => {
+        const user = auth.currentUser;
+        if (!user) throw new Error('User not authenticated');
+        const docRef = doc(db, 'users', user.uid, 'projects', id);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const project = docSnap.data();
+          set({ blocks: project.blocks });
+        }
+      },
     }),
     {
       name: 'builder-storage',

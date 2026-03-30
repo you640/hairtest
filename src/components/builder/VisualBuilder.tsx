@@ -32,6 +32,7 @@ import {
   NavbarBlock,
   FooterBlock
 } from './Blocks';
+import { AuthButton } from '@/src/components/auth/AuthButton';
 import { 
   Plus, 
   Type, 
@@ -57,8 +58,15 @@ import {
 } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
-import { generateContent } from '@/src/services/gemini';
+import { generateContent, generateSvg } from '@/src/services/gemini';
 import { publishToWordPress } from '@/src/services/wordpress';
+
+const PREDEFINED_ICONS = [
+  { name: 'Rocket', svg: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>' },
+  { name: 'Star', svg: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>' },
+  { name: 'Heart', svg: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>' },
+  { name: 'Check', svg: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' },
+];
 
 export function VisualBuilder() {
   const { 
@@ -73,12 +81,15 @@ export function VisualBuilder() {
     aiAnimationSpeed, 
     setAiAnimationSpeed,
     wpConfig,
-    setWpConfig
+    setWpConfig,
+    saveProject
   } = useBuilderStore();
   const { theme, setTheme } = useAppStore();
-  const [activeTab, setActiveTab] = useState<'add' | 'edit' | 'ai' | 'settings'>('add');
+  const [activeTab, setActiveTab] = useState<'add' | 'edit' | 'ai' | 'settings' | 'icons'>('add');
   const [aiPrompt, setAiPrompt] = useState('');
+  const [iconPrompt, setIconPrompt] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isIconGenerating, setIsIconGenerating] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [isPreview, setIsPreview] = useState(false);
   const [editingBlockId, setEditingBlockId] = useState<string | null>(null);
@@ -250,6 +261,12 @@ export function VisualBuilder() {
             AI
           </button>
           <button 
+            onClick={() => setActiveTab('icons')}
+            className={cn("flex-1 py-4 text-xs font-bold uppercase tracking-widest transition-colors", activeTab === 'icons' ? "bg-primary text-primary-foreground" : "hover:bg-muted")}
+          >
+            Icons
+          </button>
+          <button 
             onClick={() => setActiveTab('settings')}
             className={cn("flex-1 py-4 text-xs font-bold uppercase tracking-widest transition-colors", activeTab === 'settings' ? "bg-primary text-primary-foreground" : "hover:bg-muted")}
           >
@@ -385,6 +402,72 @@ export function VisualBuilder() {
                 {isGenerating ? <Wand2 className="h-5 w-5 animate-spin" /> : <Sparkles className="h-5 w-5" />}
                 {isGenerating ? 'Generating...' : editingBlockId ? 'Update Block' : 'Apply with AI'}
               </button>
+            </div>
+          )}
+
+          {activeTab === 'icons' && (
+            <div className="space-y-6">
+              <div className="rounded-md bg-primary/5 p-4 border border-primary/10">
+                <div className="flex items-center gap-2 text-primary mb-2">
+                  <Sparkles className="h-4 w-4" />
+                  <span className="text-sm font-bold">SVG Icon Generator</span>
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Describe the icon you want to generate.
+                </p>
+              </div>
+              <textarea
+                value={iconPrompt}
+                onChange={(e) => setIconPrompt(e.target.value)}
+                placeholder="e.g., A minimalist rocket ship icon..."
+                className="w-full rounded-md border bg-background p-4 text-sm focus:ring-2 focus:ring-primary focus:outline-none"
+                rows={4}
+              />
+              <button
+                onClick={async () => {
+                  setIsIconGenerating(true);
+                  try {
+                    const svg = await generateSvg(iconPrompt);
+                    const dataUrl = `data:image/svg+xml;base64,${btoa(svg)}`;
+                    addBlock('image', { src: dataUrl, alt: iconPrompt });
+                    setIconPrompt('');
+                  } catch (error) {
+                    console.error('Icon Generation Error:', error);
+                    alert('Failed to generate icon.');
+                  } finally {
+                    setIsIconGenerating(false);
+                  }
+                }}
+                disabled={isIconGenerating || !iconPrompt.trim()}
+                className="w-full flex items-center justify-center gap-2 rounded-md bg-primary py-4 text-sm font-bold text-primary-foreground shadow-lg transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50"
+              >
+                {isIconGenerating ? <Wand2 className="h-5 w-5 animate-spin" /> : <Sparkles className="h-5 w-5" />}
+                {isIconGenerating ? 'Generating...' : 'Generate Icon'}
+              </button>
+
+              <div className="h-px bg-border" />
+              
+              <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Icon Library</label>
+              <div className="grid grid-cols-2 gap-4">
+                {PREDEFINED_ICONS.map((icon) => (
+                  <div
+                    key={icon.name}
+                    draggable
+                    onDragStart={(e) => {
+                      e.dataTransfer.setData('icon-svg', icon.svg);
+                      e.dataTransfer.setData('icon-name', icon.name);
+                    }}
+                    onClick={() => {
+                      const dataUrl = `data:image/svg+xml;base64,${btoa(icon.svg)}`;
+                      addBlock('image', { src: dataUrl, alt: icon.name });
+                    }}
+                    className="p-4 border rounded-md hover:border-primary cursor-grab flex flex-col items-center gap-2"
+                  >
+                    <div dangerouslySetInnerHTML={{ __html: icon.svg }} />
+                    <span className="text-[10px] text-muted-foreground">{icon.name}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
@@ -574,6 +657,17 @@ export function VisualBuilder() {
               <p className="text-sm text-muted-foreground">Drag to reorder, click to edit.</p>
             </div>
             <div className="flex gap-2">
+              <AuthButton />
+              <button 
+                onClick={async () => {
+                  const name = prompt('Enter project name:');
+                  if (name) await saveProject(name);
+                }}
+                className="flex items-center gap-2 rounded-md bg-background border px-4 py-2 text-sm font-medium hover:bg-muted"
+              >
+                <Save className="h-4 w-4" />
+                Save
+              </button>
               <button 
                 onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
                 className="flex items-center gap-2 rounded-md bg-background border px-4 py-2 text-sm font-medium hover:bg-muted"
@@ -612,7 +706,18 @@ export function VisualBuilder() {
               strategy={verticalListSortingStrategy}
             >
               <AiGeneratingEffect isGenerating={isGenerating} type={aiAnimation} speed={aiAnimationSpeed}>
-                <div className="min-h-[80vh] rounded-md border-4 border-dashed border-muted-foreground/10 bg-background p-8 shadow-2xl transition-all">
+                <div 
+                  className="min-h-[80vh] rounded-md border-4 border-dashed border-muted-foreground/10 bg-background p-8 shadow-2xl transition-all"
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => {
+                    const svg = e.dataTransfer.getData('icon-svg');
+                    const name = e.dataTransfer.getData('icon-name');
+                    if (svg && name) {
+                      const dataUrl = `data:image/svg+xml;base64,${btoa(svg)}`;
+                      addBlock('image', { src: dataUrl, alt: name });
+                    }
+                  }}
+                >
                   {blocks.length === 0 ? (
                     <div className="flex h-[60vh] flex-col items-center justify-center text-center text-muted-foreground">
                       <Plus className="mb-4 h-16 w-16 opacity-10" />

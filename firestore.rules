@@ -1,0 +1,56 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users/{userId}/projects/{projectId}
+    // Document ID: projectId
+    // Fields:
+    //   - id: string (required) - Project ID
+    //   - userId: string (required) - Owner User ID
+    //   - name: string (required, < 100 chars) - Project Name
+    //   - blocks: list (required, < 100 items) - Project Blocks
+    //   - createdAt: string (required, ISO 8601) - Creation Timestamp
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isValidProject(data) {
+      return data.keys().hasAll(['id', 'userId', 'name', 'blocks', 'createdAt']) &&
+             data.keys().hasOnly(['id', 'userId', 'name', 'blocks', 'createdAt']) &&
+             data.id is string && data.id.size() > 0 &&
+             data.userId is string && data.userId == request.auth.uid &&
+             data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
+             data.blocks is list && data.blocks.size() < 100 &&
+             data.createdAt is string && data.createdAt.matches("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.*Z?$");
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{userId}/projects/{projectId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidProject(request.resource.data);
+      allow update: if isOwner(userId) && isValidProject(request.resource.data) &&
+                       request.resource.data.id == resource.data.id &&
+                       request.resource.data.userId == resource.data.userId &&
+                       request.resource.data.createdAt == resource.data.createdAt;
+      allow delete: if isOwner(userId);
+    }
+  }
+}

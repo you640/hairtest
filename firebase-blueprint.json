@@ -1,0 +1,23 @@
+{
+  "entities": {
+    "Project": {
+      "title": "Project",
+      "description": "A user's project in the builder.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "name": { "type": "string" },
+        "blocks": { "type": "array" },
+        "createdAt": { "type": "string", "format": "date" }
+      },
+      "required": ["id", "userId", "name", "blocks", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}/projects/{projectId}": {
+      "schema": { "$ref": "Project" },
+      "description": "Projects belonging to a user."
+    }
+  }
+}
