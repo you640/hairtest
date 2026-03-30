@@ -18,7 +18,20 @@ import { useBuilderStore, BlockType } from '@/src/lib/builderStore';
 import { useAppStore } from '@/src/lib/store';
 import { SortableBlock } from './SortableBlock';
 import { AiGeneratingEffect } from './AiGeneratingEffect';
-import { HeroBlock, TextBlock, ButtonBlock, ImageBlock, CardBlock, PricingBlock, ContactBlock, FeaturesBlock } from './Blocks';
+import { 
+  HeroBlock, 
+  TextBlock, 
+  ButtonBlock, 
+  ImageBlock, 
+  CardBlock, 
+  PricingBlock, 
+  ContactBlock, 
+  FeaturesBlock,
+  TestimonialsBlock,
+  FAQBlock,
+  NavbarBlock,
+  FooterBlock
+} from './Blocks';
 import { 
   Plus, 
   Type, 
@@ -36,7 +49,11 @@ import {
   Moon,
   Sun,
   Globe,
-  Loader2
+  Loader2,
+  MessageSquare,
+  HelpCircle,
+  Download,
+  Trash2
 } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
@@ -64,6 +81,7 @@ export function VisualBuilder() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [isPreview, setIsPreview] = useState(false);
+  const [editingBlockId, setEditingBlockId] = useState<string | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -104,6 +122,10 @@ export function VisualBuilder() {
               {block.type === 'pricing' && <PricingBlock {...block.props} />}
               {block.type === 'contact' && <ContactBlock {...block.props} />}
               {block.type === 'features' && <FeaturesBlock {...block.props} />}
+              {block.type === 'testimonials' && <TestimonialsBlock {...block.props} />}
+              {block.type === 'faq' && <FAQBlock {...block.props} />}
+              {block.type === 'navbar' && <NavbarBlock {...block.props} />}
+              {block.type === 'footer' && <FooterBlock {...block.props} />}
             </div>
           ))}
         </div>
@@ -114,12 +136,18 @@ export function VisualBuilder() {
   const handleAiGenerate = async () => {
     if (!aiPrompt.trim()) return;
     setIsGenerating(true);
+    
+    const targetBlock = editingBlockId ? blocks.find(b => b.id === editingBlockId) : null;
+
     try {
       const response = await generateContent(`
         You are an expert React UI builder AI. Your task is to generate or modify a JSON structure representing a webpage based on the user's request.
         
-        Current page structure (JSON):
-        ${JSON.stringify(blocks)}
+        ${targetBlock ? `TARGET BLOCK TO MODIFY:
+        ID: ${targetBlock.id}
+        Type: ${targetBlock.type}
+        Current Props: ${JSON.stringify(targetBlock.props)}` : `Current page structure (JSON):
+        ${JSON.stringify(blocks)}`}
         
         User request: "${aiPrompt}"
         
@@ -132,10 +160,19 @@ export function VisualBuilder() {
         - pricing: { title: string, price: string, features: string }
         - contact: { title: string, email: string }
         - features: { title: string, features: Array<{ title: string, description: string }> }
+        - testimonials: { title: string, testimonials: Array<{ content: string, author: string, role: string }> }
+        - faq: { title: string, items: Array<{ question: string, answer: string }> }
+        - navbar: { logo: string, links: Array<{ label: string, href: string }> }
+        - footer: { text: string, links: Array<{ label: string, href: string }> }
 
         INSTRUCTIONS:
-        1. Analyze the user's request. Do they want to CREATE a completely new page, ADD new blocks to the existing page, or MODIFY existing blocks?
-        2. If creating a NEW page or ADDING blocks, return a JSON array of new block objects. Example:
+        1. Analyze the user's request. 
+        ${targetBlock ? `2. You MUST return a JSON object with an "update" key containing exactly one change for the target block ID ${targetBlock.id}. Example:
+           {
+             "update": [
+               { "id": "${targetBlock.id}", "props": { "title": "New Title" } }
+             ]
+           }` : `2. If creating a NEW page or ADDING blocks, return a JSON array of new block objects. Example:
            [
              { "type": "hero", "props": { "title": "Welcome", "subtitle": "Best app", "cta": "Start" } },
              { "type": "text", "props": { "content": "Our story..." } }
@@ -145,7 +182,7 @@ export function VisualBuilder() {
              "update": [
                { "id": "existing-block-id-1", "props": { "title": "New Title" } }
              ]
-           }
+           }`}
         4. If the user asks for a full page (e.g., "Create a landing page for a bakery"), generate a complete, logical sequence of blocks (Hero -> Text -> Cards -> Contact).
         5. Use realistic, high-quality placeholder text and image URLs (e.g., https://picsum.photos/seed/bakery/800/400).
         
@@ -159,11 +196,10 @@ export function VisualBuilder() {
         result.update.forEach((u: any) => updateBlock(u.id, u.props));
       } else {
         const newBlocks = result.map((b: any) => ({ ...b, id: Math.random().toString(36).substr(2, 9) }));
-        // If the user asked for a "full page" or "landing page", we might want to clear existing blocks.
-        // For now, we append. If you want to replace, use setBlocks(newBlocks) instead.
         setBlocks([...blocks, ...newBlocks]);
       }
       setAiPrompt('');
+      setEditingBlockId(null);
     } catch (error) {
       console.error('AI Builder Error:', error);
       alert('Failed to generate content. Please try a different prompt or check the console for details.');
@@ -232,6 +268,10 @@ export function VisualBuilder() {
                 { type: 'image', icon: ImageIcon, label: 'Image' },
                 { type: 'card', icon: CreditCard, label: 'Card' },
                 { type: 'pricing', icon: CreditCard, label: 'Pricing' },
+                { type: 'testimonials', icon: MessageSquare, label: 'Testimonials' },
+                { type: 'faq', icon: HelpCircle, label: 'FAQ' },
+                { type: 'navbar', icon: Layout, label: 'Navbar' },
+                { type: 'footer', icon: Layout, label: 'Footer' },
                 { type: 'contact', icon: Layout, label: 'Contact' },
               ].map((item) => (
                 <button
@@ -248,6 +288,30 @@ export function VisualBuilder() {
 
           {activeTab === 'edit' && (
             <div className="space-y-6">
+              {/* Layer List */}
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Layers</label>
+                <div className="space-y-1 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
+                  {blocks.map((block, index) => (
+                    <button
+                      key={block.id}
+                      onClick={() => setSelectedBlock(block.id)}
+                      className={cn(
+                        "w-full flex items-center gap-3 px-3 py-2 rounded-md text-xs transition-all",
+                        selectedBlockId === block.id 
+                          ? "bg-primary text-primary-foreground font-bold shadow-md" 
+                          : "hover:bg-muted text-muted-foreground"
+                      )}
+                    >
+                      <span className="opacity-50 font-mono">{index + 1}</span>
+                      <span className="capitalize">{block.type}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="h-px bg-border" />
+
               {!selectedBlock ? (
                 <div className="text-center py-12 text-muted-foreground">
                   <Settings2 className="h-12 w-12 mx-auto mb-4 opacity-20" />
@@ -291,13 +355,25 @@ export function VisualBuilder() {
                   <span className="text-sm font-bold">AI Page Builder</span>
                 </div>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Describe what you want to build or how to modify existing blocks.
+                  {editingBlockId 
+                    ? `You are currently editing a specific block. Describe the changes you want to make to it.`
+                    : `Describe what you want to build or how to modify existing blocks.`}
                 </p>
+                {editingBlockId && (
+                  <button 
+                    onClick={() => setEditingBlockId(null)}
+                    className="mt-2 text-[10px] font-bold uppercase text-primary hover:underline"
+                  >
+                    Cancel selective edit
+                  </button>
+                )}
               </div>
               <textarea
                 value={aiPrompt}
                 onChange={(e) => setAiPrompt(e.target.value)}
-                placeholder="e.g., Add a pricing section, or change the hero title to 'Welcome to our site'..."
+                placeholder={editingBlockId 
+                  ? "e.g., Change the title to 'Our Mission' and make the text more professional..."
+                  : "e.g., Add a pricing section, or change the hero title to 'Welcome to our site'..."}
                 className="w-full rounded-md border bg-background p-4 text-sm focus:ring-2 focus:ring-primary focus:outline-none"
                 rows={6}
               />
@@ -307,7 +383,7 @@ export function VisualBuilder() {
                 className="w-full flex items-center justify-center gap-2 rounded-md bg-primary py-4 text-sm font-bold text-primary-foreground shadow-lg transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50"
               >
                 {isGenerating ? <Wand2 className="h-5 w-5 animate-spin" /> : <Sparkles className="h-5 w-5" />}
-                {isGenerating ? 'Generating...' : 'Apply with AI'}
+                {isGenerating ? 'Generating...' : editingBlockId ? 'Update Block' : 'Apply with AI'}
               </button>
             </div>
           )}
@@ -449,6 +525,32 @@ export function VisualBuilder() {
                     {isPublishing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Globe className="h-4 w-4" />}
                     {isPublishing ? 'Publishing...' : 'Publish to WordPress'}
                   </button>
+
+                  <button 
+                    onClick={() => {
+                      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(blocks, null, 2));
+                      const downloadAnchorNode = document.createElement('a');
+                      downloadAnchorNode.setAttribute("href",     dataStr);
+                      downloadAnchorNode.setAttribute("download", "page-structure.json");
+                      document.body.appendChild(downloadAnchorNode);
+                      downloadAnchorNode.click();
+                      downloadAnchorNode.remove();
+                    }}
+                    className="w-full flex items-center justify-center gap-2 rounded-md border bg-background py-3 text-sm font-bold hover:bg-muted transition-colors"
+                  >
+                    <Download className="h-4 w-4" />
+                    Export JSON
+                  </button>
+
+                  <button 
+                    onClick={() => {
+                      navigator.clipboard.writeText(JSON.stringify(blocks, null, 2));
+                    }}
+                    className="w-full flex items-center justify-center gap-2 rounded-md border bg-background py-3 text-sm font-bold hover:bg-muted transition-colors"
+                  >
+                    <Save className="h-4 w-4" />
+                    Copy to Clipboard
+                  </button>
                 </div>
               </div>
             </div>
@@ -472,6 +574,20 @@ export function VisualBuilder() {
               <p className="text-sm text-muted-foreground">Drag to reorder, click to edit.</p>
             </div>
             <div className="flex gap-2">
+              <button 
+                onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+                className="flex items-center gap-2 rounded-md bg-background border px-4 py-2 text-sm font-medium hover:bg-muted"
+              >
+                {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+                {theme === 'light' ? 'Dark' : 'Light'}
+              </button>
+              <button 
+                onClick={() => setBlocks([])}
+                className="flex items-center gap-2 rounded-md bg-destructive/10 border border-destructive/20 px-4 py-2 text-xs font-bold text-destructive hover:bg-destructive hover:text-white transition-all"
+              >
+                <Trash2 className="h-3 w-3" />
+                Clear
+              </button>
               <button 
                 onClick={() => setIsPreview(true)}
                 className="flex items-center gap-2 rounded-md bg-background border px-4 py-2 text-sm font-medium hover:bg-muted"
@@ -505,7 +621,14 @@ export function VisualBuilder() {
                     </div>
                   ) : (
                     blocks.map((block) => (
-                      <SortableBlock key={block.id} block={block} />
+                      <SortableBlock 
+                        key={block.id} 
+                        block={block} 
+                        onAiEdit={(id) => {
+                          setEditingBlockId(id);
+                          setActiveTab('ai');
+                        }}
+                      />
                     ))
                   )}
                 </div>

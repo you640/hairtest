@@ -1,13 +1,26 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Block, useBuilderStore } from '@/src/lib/builderStore';
-import { HeroBlock, TextBlock, ButtonBlock, ImageBlock, CardBlock, PricingBlock, ContactBlock, FeaturesBlock } from './Blocks';
+import { 
+  HeroBlock, 
+  TextBlock, 
+  ButtonBlock, 
+  ImageBlock, 
+  CardBlock, 
+  PricingBlock, 
+  ContactBlock, 
+  FeaturesBlock,
+  TestimonialsBlock,
+  FAQBlock,
+  NavbarBlock,
+  FooterBlock
+} from './Blocks';
 import { cn } from '@/src/lib/utils';
-import { Trash2, GripVertical } from 'lucide-react';
+import { Trash2, GripVertical, Sparkles, Wand2, Copy } from 'lucide-react';
 import { motion } from 'motion/react';
 
-export function SortableBlock({ block }: { block: Block }) {
-  const { selectedBlockId, setSelectedBlock, removeBlock } = useBuilderStore();
+export function SortableBlock({ block, onAiEdit }: { block: Block, onAiEdit?: (id: string) => void }) {
+  const { selectedBlockId, setSelectedBlock, removeBlock, duplicateBlock } = useBuilderStore();
   const isSelected = selectedBlockId === block.id;
 
   const {
@@ -36,6 +49,10 @@ export function SortableBlock({ block }: { block: Block }) {
       case 'pricing': return <PricingBlock {...block.props} isEditing />;
       case 'contact': return <ContactBlock {...block.props} isEditing />;
       case 'features': return <FeaturesBlock {...block.props} isEditing />;
+      case 'testimonials': return <TestimonialsBlock {...block.props} isEditing />;
+      case 'faq': return <FAQBlock {...block.props} isEditing />;
+      case 'navbar': return <NavbarBlock {...block.props} isEditing />;
+      case 'footer': return <FooterBlock {...block.props} isEditing />;
       default: return null;
     }
   };
@@ -96,6 +113,26 @@ export function SortableBlock({ block }: { block: Block }) {
         >
           <Trash2 className="h-5 w-5" />
         </motion.button>
+
+        <motion.button 
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={(e) => { e.stopPropagation(); duplicateBlock(block.id); }}
+          className="rounded-md bg-muted p-3 text-muted-foreground border-2 border-muted-foreground/20 shadow-xl hover:bg-muted-foreground hover:text-muted transition-colors"
+        >
+          <Copy className="h-5 w-5" />
+        </motion.button>
+
+        {onAiEdit && (
+          <motion.button 
+            whileHover={{ scale: 1.1, backgroundColor: "var(--primary)", color: "var(--primary-foreground)" }}
+            whileTap={{ scale: 0.9 }}
+            onClick={(e) => { e.stopPropagation(); onAiEdit(block.id); }}
+            className="rounded-md bg-primary/10 p-3 text-primary border-2 border-primary/20 shadow-xl hover:bg-primary hover:text-primary-foreground transition-colors"
+          >
+            <Sparkles className="h-5 w-5" />
+          </motion.button>
+        )}
       </div>
 
       <div className="overflow-hidden rounded-md">

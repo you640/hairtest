@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { nanoid } from 'nanoid';
 
-export type BlockType = 'hero' | 'text' | 'button' | 'image' | 'grid' | 'card' | 'pricing' | 'contact' | 'features';
+export type BlockType = 'hero' | 'text' | 'button' | 'image' | 'grid' | 'card' | 'pricing' | 'contact' | 'features' | 'testimonials' | 'faq' | 'navbar' | 'footer';
 export type AiAnimationType = 'zero-g' | 'singularity' | 'magnetic' | 'none';
 export type ThemeType = 'light' | 'dark';
 
@@ -33,6 +33,7 @@ interface BuilderState {
   setAiAnimationSpeed: (speed: number) => void;
   setTheme: (theme: ThemeType) => void;
   setWpConfig: (config: Partial<BuilderState['wpConfig']>) => void;
+  duplicateBlock: (id: string) => void;
 }
 
 const DEFAULT_PROPS: Record<BlockType, any> = {
@@ -52,6 +53,36 @@ const DEFAULT_PROPS: Record<BlockType, any> = {
       { title: 'Scalable', description: 'Grows with your business.' }
     ] 
   },
+  testimonials: {
+    title: 'What Our Clients Say',
+    testimonials: [
+      { content: 'This builder is amazing!', author: 'John Doe', role: 'CEO' },
+      { content: 'Saved us weeks of work.', author: 'Jane Smith', role: 'Designer' }
+    ]
+  },
+  faq: {
+    title: 'Frequently Asked Questions',
+    items: [
+      { question: 'Is it free?', answer: 'Yes, for personal use.' },
+      { question: 'How do I export?', answer: 'Use the export button in settings.' }
+    ]
+  },
+  navbar: {
+    logo: 'AI Builder',
+    links: [
+      { label: 'Home', href: '#' },
+      { label: 'Features', href: '#features' },
+      { label: 'Pricing', href: '#pricing' },
+      { label: 'Contact', href: '#contact' }
+    ]
+  },
+  footer: {
+    text: '© 2026 AI PWA Builder. All rights reserved.',
+    links: [
+      { label: 'Privacy Policy', href: '#' },
+      { label: 'Terms of Service', href: '#' }
+    ]
+  }
 };
 
 export const useBuilderStore = create<BuilderState>()(
@@ -87,6 +118,15 @@ export const useBuilderStore = create<BuilderState>()(
         const newBlocks = [...state.blocks];
         const [removed] = newBlocks.splice(oldIndex, 1);
         newBlocks.splice(newIndex, 0, removed);
+        return { blocks: newBlocks };
+      }),
+      duplicateBlock: (id) => set((state) => {
+        const index = state.blocks.findIndex((b) => b.id === id);
+        if (index === -1) return state;
+        const block = state.blocks[index];
+        const newBlock = { ...block, id: nanoid() };
+        const newBlocks = [...state.blocks];
+        newBlocks.splice(index + 1, 0, newBlock);
         return { blocks: newBlocks };
       }),
       setBlocks: (blocks) => set({ blocks }),

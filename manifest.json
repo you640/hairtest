@@ -1,0 +1,21 @@
+{
+  "name": "AI PWA Builder",
+  "short_name": "AI Builder",
+  "description": "Build high-quality PWAs with AI.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "https://picsum.photos/seed/builder-icon/192/192",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://picsum.photos/seed/builder-icon/512/512",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

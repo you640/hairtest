@@ -154,3 +154,102 @@ export const FeaturesBlock = ({ title, features, isEditing }: any) => (
     </div>
   </motion.div>
 );
+
+export const TestimonialsBlock = ({ title, testimonials, isEditing }: any) => (
+  <motion.div 
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.6 }}
+    className={cn("py-16 max-w-6xl mx-auto px-4", isEditing && "cursor-pointer hover:bg-muted/50 rounded-md transition-colors")}
+  >
+    <h2 className="text-3xl font-bold text-center mb-12">{title}</h2>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {(testimonials || []).map((t: any, i: number) => (
+        <motion.div 
+          key={i}
+          whileHover={{ y: -5 }}
+          className="bg-card border rounded-md p-8 shadow-lg italic relative"
+        >
+          <div className="text-4xl text-primary/20 absolute top-4 left-4 font-serif">"</div>
+          <p className="mb-6 relative z-10">{t.content}</p>
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center font-bold text-primary">
+              {t.author?.[0]}
+            </div>
+            <div>
+              <div className="font-bold text-sm">{t.author}</div>
+              <div className="text-xs text-muted-foreground">{t.role}</div>
+            </div>
+          </div>
+        </motion.div>
+      ))}
+    </div>
+  </motion.div>
+);
+
+export const FAQBlock = ({ title, items, isEditing }: any) => (
+  <motion.div 
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.6 }}
+    className={cn("py-16 max-w-3xl mx-auto px-4", isEditing && "cursor-pointer hover:bg-muted/50 rounded-md transition-colors")}
+  >
+    <h2 className="text-3xl font-bold text-center mb-12">{title}</h2>
+    <div className="space-y-4">
+      {(items || []).map((item: any, i: number) => (
+        <motion.div 
+          key={i}
+          className="bg-card border rounded-md p-6"
+        >
+          <h3 className="text-lg font-bold mb-2 flex items-center gap-2">
+            <span className="text-primary">Q:</span> {item.question}
+          </h3>
+          <p className="text-muted-foreground">
+            <span className="text-muted-foreground/50">A:</span> {item.answer}
+          </p>
+        </motion.div>
+      ))}
+    </div>
+  </motion.div>
+);
+
+export const NavbarBlock = ({ logo, links, isEditing }: any) => (
+  <motion.nav 
+    initial={{ opacity: 0, y: -20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.6 }}
+    className={cn("py-4 px-8 flex items-center justify-between bg-background/80 backdrop-blur-md border-b sticky top-0 z-40", isEditing && "cursor-pointer hover:bg-muted/50 rounded-md transition-colors")}
+  >
+    <div className="text-xl font-black tracking-tighter text-primary uppercase italic">{logo}</div>
+    <div className="hidden md:flex items-center gap-8">
+      {(links || []).map((link: any, i: number) => (
+        <a key={i} href={link.href} className="text-sm font-bold hover:text-primary transition-colors uppercase tracking-widest">
+          {link.label}
+        </a>
+      ))}
+    </div>
+    <button className="bg-primary text-primary-foreground px-4 py-2 rounded-md text-xs font-bold uppercase tracking-widest shadow-lg">
+      Get Started
+    </button>
+  </motion.nav>
+);
+
+export const FooterBlock = ({ text, links, isEditing }: any) => (
+  <motion.footer 
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.6 }}
+    className={cn("py-12 px-8 border-t bg-muted/30", isEditing && "cursor-pointer hover:bg-muted/50 rounded-md transition-colors")}
+  >
+    <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
+      <div className="text-sm text-muted-foreground font-medium">{text}</div>
+      <div className="flex items-center gap-8">
+        {(links || []).map((link: any, i: number) => (
+          <a key={i} href={link.href} className="text-xs font-bold hover:text-primary transition-colors uppercase tracking-widest">
+            {link.label}
+          </a>
+        ))}
+      </div>
+    </div>
+  </motion.footer>
+);
