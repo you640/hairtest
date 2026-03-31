@@ -84,10 +84,12 @@ export function VisualBuilder() {
     setWpConfig,
     saveProject,
     pageTheme,
-    setPageTheme
+    setPageTheme,
+    themePreset,
+    setThemePreset
   } = useBuilderStore();
   const { theme, setTheme } = useAppStore();
-  const [activeTab, setActiveTab] = useState<'add' | 'edit' | 'ai' | 'settings' | 'icons'>('add');
+  const [activeTab, setActiveTab] = useState<'add' | 'edit' | 'ai' | 'settings' | 'icons' | 'theme'>('add');
   const [isAiGenerating, setIsAiGenerating] = useState(false);
   const [aiPrompt, setAiPrompt] = useState('');
   const [iconPrompt, setIconPrompt] = useState('');
@@ -175,8 +177,11 @@ export function VisualBuilder() {
     const targetBlock = editingBlockId ? blocks.find(b => b.id === editingBlockId) : null;
 
     try {
-      const response = await generateContent(`
+      const prompt = `
         You are an expert React UI builder AI. Your task is to generate or modify a JSON structure representing a high-quality, professional webpage based on the user's request.
+        
+        VISUAL STYLE: ${themePreset.toUpperCase()}
+        PAGE CONTEXT: "${pageTheme}"
         
         ${targetBlock ? `TARGET BLOCK TO MODIFY:
         ID: ${targetBlock.id}
@@ -187,50 +192,43 @@ export function VisualBuilder() {
         User request: "${aiPrompt}"
         
         AVAILABLE BLOCK TYPES AND REQUIRED PROPS:
-        - hero: { title: string, subtitle: string, cta: string } - The main attention-grabbing section.
-        - features: { title: string, features: Array<{ title: string, description: string }> } - Showcase key benefits.
-        - text: { content: string } - General text content.
-        - button: { label: string, variant: 'primary' | 'secondary' } - Call to action.
-        - image: { src: string, alt: string } - Visual elements.
-        - card: { title: string, content: string } - Information cards.
-        - pricing: { title: string, price: string, features: string } - Pricing plans.
-        - contact: { title: string, email: string } - Contact information.
-        - testimonials: { title: string, testimonials: Array<{ content: string, author: string, role: string }> } - Client feedback.
-        - faq: { title: string, items: Array<{ question: string, answer: string }> } - Frequently asked questions.
-        - navbar: { logo: string, links: Array<{ label: string, href: string }> } - Navigation.
-        - footer: { text: string, links: Array<{ label: string, href: string }> } - Page footer.
+        - navbar: { logo: string, links: Array<{ label: string, href: string }> }
+        - hero: { title: string, subtitle: string, cta: string }
+        - features: { title: string, features: Array<{ title: string, description: string }> }
+        - text: { content: string }
+        - button: { label: string, variant: 'primary' | 'secondary' }
+        - image: { src: string, alt: string }
+        - card: { title: string, content: string }
+        - pricing: { title: string, price: string, features: string }
+        - contact: { title: string, email: string }
+        - contactForm: { title: string, email: string, message: string }
+        - testimonials: { title: string, testimonials: Array<{ content: string, author: string, role: string }> }
+        - faq: { title: string, items: Array<{ question: string, answer: string }> }
+        - footer: { text: string, links: Array<{ label: string, href: string }> }
 
-        DESIGN PRINCIPLES:
-        1. MOBILE-FIRST: Ensure all content is concise and readable on small screens.
-        2. CONSISTENCY: Maintain a consistent tone and style across all blocks.
-        3. ENGAGEMENT: Use persuasive and professional copy.
-        4. ACCESSIBILITY: Provide descriptive alt text for images.
-        5. LOGICAL FLOW: Arrange blocks in a way that tells a story (e.g., Hero -> Features -> Testimonials -> Pricing -> Contact).
+        DESIGN PRINCIPLES FOR ${themePreset.toUpperCase()} STYLE:
+        ${themePreset === 'brutalist' ? '- Use bold, aggressive typography. High contrast. Raw layout.' : ''}
+        ${themePreset === 'minimal' ? '- Use lots of whitespace. Subtle typography. Clean and airy.' : ''}
+        ${themePreset === 'glass' ? '- Use frosted glass effects. Deep shadows. Vibrant colors.' : ''}
+        ${themePreset === 'modern' ? '- Use sharp borders. Professional gradients. Clean grid.' : ''}
 
         INSTRUCTIONS:
         1. Analyze the user's request carefully. 
-        ${targetBlock ? `2. You MUST return a JSON object with an "update" key containing exactly one change for the target block ID ${targetBlock.id}. Example:
+        2. If the prompt is "Create a landing page for [X]", generate a complete, logical sequence of blocks (Navbar -> Hero -> Features -> ... -> Footer).
+        3. Use realistic, high-quality placeholder text and image URLs (e.g., https://picsum.photos/seed/[keyword]/1200/600).
+        4. For array-based props, generate at least 3-4 high-quality items.
+        
+        ${targetBlock ? `5. You MUST return a JSON object with an "update" key containing exactly one change for the target block ID ${targetBlock.id}. Example:
            {
              "update": [
                { "id": "${targetBlock.id}", "props": { "title": "New Title" } }
              ]
-           }` : `2. If creating a NEW page or ADDING blocks, return a JSON array of new block objects. Example:
-           [
-             { "type": "hero", "props": { "title": "Welcome", "subtitle": "Best app", "cta": "Start" } },
-             { "type": "text", "props": { "content": "Our story..." } }
-           ]
-        3. If MODIFYING existing blocks, return a JSON object with an "update" key containing an array of changes. You must use the exact "id" from the current page structure. Example:
-           {
-             "update": [
-               { "id": "existing-block-id-1", "props": { "title": "New Title" } }
-             ]
-           }`}
-        4. If the user asks for a full page (e.g., "Create a landing page for a bakery"), generate a complete, logical sequence of blocks.
-        5. Use realistic, high-quality placeholder text and image URLs (e.g., https://picsum.photos/seed/bakery/800/400).
-        6. For array-based props (features, testimonials, faq, links), generate at least 3-4 high-quality items.
+           }` : `5. Return a JSON array of new block objects. If creating a whole page, include all necessary blocks.`}
         
-        CRITICAL: Return ONLY valid JSON. Do not include markdown formatting like \`\`\`json or any conversational text. Just the raw JSON array or object.
-      `, selectedModel);
+        CRITICAL: Return ONLY valid JSON. No markdown formatting. No conversational text.
+      `;
+      
+      const response = await generateContent(prompt, selectedModel);
       
       const jsonStr = response.replace(/```json|```/g, '').trim();
       const result = JSON.parse(jsonStr);
@@ -313,9 +311,24 @@ export function VisualBuilder() {
           >
             Edit
           </button>
+          {selectedBlockId && (
+            <button 
+              onClick={() => {
+                setEditingBlockId(selectedBlockId);
+                setActiveTab('ai');
+              }}
+              className={cn(
+                "flex-1 px-4 py-4 text-[10px] font-bold uppercase tracking-widest transition-colors whitespace-nowrap flex items-center justify-center gap-1", 
+                activeTab === 'ai' && editingBlockId === selectedBlockId ? "bg-primary text-primary-foreground" : "text-primary hover:bg-muted"
+              )}
+            >
+              <Sparkles className={cn("h-3 w-3", activeTab !== 'ai' && "animate-pulse")} />
+              AI Edit
+            </button>
+          )}
           <button 
             onClick={() => setActiveTab('ai')}
-            className={cn("flex-1 px-4 py-4 text-[10px] font-bold uppercase tracking-widest transition-colors whitespace-nowrap", activeTab === 'ai' ? "bg-primary text-primary-foreground" : "hover:bg-muted")}
+            className={cn("flex-1 px-4 py-4 text-[10px] font-bold uppercase tracking-widest transition-colors whitespace-nowrap", activeTab === 'ai' && !editingBlockId ? "bg-primary text-primary-foreground" : "hover:bg-muted")}
           >
             AI
           </button>
@@ -324,6 +337,12 @@ export function VisualBuilder() {
             className={cn("flex-1 px-4 py-4 text-[10px] font-bold uppercase tracking-widest transition-colors whitespace-nowrap", activeTab === 'icons' ? "bg-primary text-primary-foreground" : "hover:bg-muted")}
           >
             Icons
+          </button>
+          <button 
+            onClick={() => setActiveTab('theme')}
+            className={cn("flex-1 px-4 py-4 text-[10px] font-bold uppercase tracking-widest transition-colors whitespace-nowrap", activeTab === 'theme' ? "bg-primary text-primary-foreground" : "hover:bg-muted")}
+          >
+            Theme
           </button>
           <button 
             onClick={() => setActiveTab('settings')}
@@ -398,6 +417,23 @@ export function VisualBuilder() {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <h3 className="font-bold text-lg capitalize">{selectedBlock.type} Settings</h3>
+                  </div>
+
+                  <div className="rounded-md border bg-primary/5 p-3 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-primary">
+                        <Sparkles className="h-3 w-3" />
+                        <span className="text-[10px] font-bold uppercase tracking-widest">AI Content Generator</span>
+                      </div>
+                      <select 
+                        value={selectedModel}
+                        onChange={(e) => setSelectedModel(e.target.value)}
+                        className="bg-transparent text-[10px] font-bold uppercase outline-none text-muted-foreground"
+                      >
+                        {models.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+                      </select>
+                    </div>
+                    
                     <button
                       onClick={async () => {
                         const prompt = window.prompt('Describe the content you want for this block:');
@@ -417,9 +453,10 @@ export function VisualBuilder() {
                         }
                       }}
                       disabled={isAiGenerating}
-                      className="text-[10px] font-bold uppercase text-primary hover:underline"
+                      className="w-full flex items-center justify-center gap-2 rounded-md bg-primary py-2 text-[10px] font-bold uppercase text-primary-foreground shadow-sm hover:bg-primary/90 disabled:opacity-50"
                     >
-                      {isAiGenerating ? 'Generating...' : '✨ Generate Block'}
+                      {isAiGenerating ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
+                      {isAiGenerating ? 'Generating...' : 'Generate with AI'}
                     </button>
                   </div>
                   {Object.entries(selectedBlock.props).map(([key, value]) => (
@@ -586,6 +623,73 @@ export function VisualBuilder() {
                 {isGenerating ? <Wand2 className="h-5 w-5 animate-spin" /> : <Sparkles className="h-5 w-5" />}
                 {isGenerating ? 'Generating...' : editingBlockId ? 'Update Block' : 'Apply with AI'}
               </button>
+            </div>
+          )}
+
+          {activeTab === 'theme' && (
+            <div className="space-y-8">
+              <div className="space-y-4">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Visual Style</label>
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { id: 'modern', label: 'Modern', desc: 'Clean & Sharp' },
+                    { id: 'brutalist', label: 'Brutalist', desc: 'Bold & Raw' },
+                    { id: 'minimal', label: 'Minimal', desc: 'Soft & Airy' },
+                    { id: 'glass', label: 'Glass', desc: 'Frosted & Deep' },
+                  ].map((preset) => (
+                    <button
+                      key={preset.id}
+                      onClick={() => setThemePreset(preset.id as any)}
+                      className={cn(
+                        "flex flex-col items-start gap-1 p-4 rounded-xl border-2 text-left transition-all hover:scale-[1.02]",
+                        themePreset === preset.id 
+                          ? "border-primary bg-primary/5 shadow-lg" 
+                          : "border-transparent bg-muted/50 hover:border-muted-foreground/30"
+                      )}
+                    >
+                      <span className="text-sm font-black uppercase tracking-tighter">{preset.label}</span>
+                      <span className="text-[10px] text-muted-foreground font-medium">{preset.desc}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Page Theme / Context</label>
+                <textarea
+                  value={pageTheme}
+                  onChange={(e) => setPageTheme(e.target.value)}
+                  placeholder="e.g. Luxury Swiss Watch Brand, Cyberpunk Coffee Shop..."
+                  className="w-full p-4 rounded-xl border bg-background text-sm min-h-[100px] focus:ring-2 focus:ring-primary outline-none transition-all"
+                />
+                <p className="text-[10px] text-muted-foreground leading-relaxed italic">
+                  This context guides the AI when generating content and selecting appropriate visual metaphors.
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Interface Mode</label>
+                <div className="flex gap-2 p-1 bg-muted rounded-full">
+                  <button
+                    onClick={() => setTheme('light')}
+                    className={cn(
+                      "flex-1 flex items-center justify-center gap-2 py-2 rounded-full text-xs font-bold transition-all",
+                      theme === 'light' ? "bg-background shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    <Sun className="h-3 w-3" /> Light
+                  </button>
+                  <button
+                    onClick={() => setTheme('dark')}
+                    className={cn(
+                      "flex-1 flex items-center justify-center gap-2 py-2 rounded-full text-xs font-bold transition-all",
+                      theme === 'dark' ? "bg-background shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    <Moon className="h-3 w-3" /> Dark
+                  </button>
+                </div>
+              </div>
             </div>
           )}
 

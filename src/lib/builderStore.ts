@@ -25,6 +25,7 @@ interface BuilderState {
   aiAnimation: AiAnimationType;
   aiAnimationSpeed: number;
   theme: ThemeType;
+  themePreset: 'modern' | 'brutalist' | 'minimal' | 'glass';
   pageTheme: string;
   wpConfig: {
     url: string;
@@ -40,6 +41,7 @@ interface BuilderState {
   setAiAnimation: (type: AiAnimationType) => void;
   setAiAnimationSpeed: (speed: number) => void;
   setTheme: (theme: ThemeType) => void;
+  setThemePreset: (preset: 'modern' | 'brutalist' | 'minimal' | 'glass') => void;
   setPageTheme: (theme: string) => void;
   setWpConfig: (config: Partial<BuilderState['wpConfig']>) => void;
   duplicateBlock: (id: string) => void;
@@ -116,6 +118,7 @@ export const useBuilderStore = create<BuilderState>()(
       aiAnimation: 'zero-g',
       aiAnimationSpeed: 1,
       theme: 'light',
+      themePreset: 'modern',
       pageTheme: 'Professional Business',
       wpConfig: {
         url: '',
@@ -158,6 +161,7 @@ export const useBuilderStore = create<BuilderState>()(
       setAiAnimation: (type) => set({ aiAnimation: type }),
       setAiAnimationSpeed: (speed) => set({ aiAnimationSpeed: speed }),
       setTheme: (theme) => set({ theme }),
+      setThemePreset: (preset) => set({ themePreset: preset }),
       setPageTheme: (theme) => set({ pageTheme: theme }),
       setWpConfig: (config) => set((state) => ({
         wpConfig: { ...state.wpConfig, ...config }

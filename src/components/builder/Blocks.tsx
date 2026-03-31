@@ -2,10 +2,42 @@ import { ReactNode, useState } from 'react';
 import { cn } from '@/src/lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 import { Menu, X } from 'lucide-react';
-import { DEFAULT_STYLE } from '@/src/lib/builderStore';
+import { DEFAULT_STYLE, useBuilderStore } from '@/src/lib/builderStore';
+
+const getPresetClasses = (preset: string) => {
+  switch (preset) {
+    case 'brutalist':
+      return {
+        card: "border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] rounded-none",
+        button: "border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-none font-black uppercase tracking-tighter",
+        heading: "font-black uppercase tracking-tighter italic",
+      };
+    case 'minimal':
+      return {
+        card: "border-none shadow-none bg-muted/20 rounded-xl",
+        button: "rounded-full font-medium tracking-tight",
+        heading: "font-light tracking-tight",
+      };
+    case 'glass':
+      return {
+        card: "bg-white/10 backdrop-blur-md border border-white/20 shadow-xl rounded-2xl",
+        button: "bg-white/20 backdrop-blur-sm border border-white/30 rounded-xl font-semibold",
+        heading: "font-bold tracking-tight",
+      };
+    default: // modern
+      return {
+        card: "bg-card border rounded-xl p-8 shadow-lg",
+        button: "rounded-lg font-bold shadow-md",
+        heading: "font-extrabold tracking-tight",
+      };
+  }
+};
 
 export const HeroBlock = ({ title, subtitle, cta, isEditing, style }: any) => {
   const s = style || DEFAULT_STYLE;
+  const { themePreset } = useBuilderStore();
+  const preset = getPresetClasses(themePreset);
+
   return (
     <motion.section 
       initial={{ opacity: 0, y: 20 }}
@@ -17,7 +49,7 @@ export const HeroBlock = ({ title, subtitle, cta, isEditing, style }: any) => {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="text-4xl md:text-6xl font-extrabold tracking-tight mb-6 leading-tight"
+        className={cn("text-4xl md:text-7xl mb-6 leading-tight", preset.heading)}
       >
         {title}
       </motion.h1>
@@ -32,7 +64,7 @@ export const HeroBlock = ({ title, subtitle, cta, isEditing, style }: any) => {
       <motion.button 
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        className="bg-primary text-primary-foreground px-8 py-3 rounded-md font-bold shadow-lg transition-transform"
+        className={cn("bg-primary text-primary-foreground px-10 py-4 transition-all", preset.button)}
       >
         {cta}
       </motion.button>
@@ -56,6 +88,9 @@ export const TextBlock = ({ content, isEditing, style }: any) => {
 
 export const ButtonBlock = ({ label, variant, isEditing, style }: any) => {
   const s = style || DEFAULT_STYLE;
+  const { themePreset } = useBuilderStore();
+  const preset = getPresetClasses(themePreset);
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -67,7 +102,8 @@ export const ButtonBlock = ({ label, variant, isEditing, style }: any) => {
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         className={cn(
-          "px-6 py-2 rounded-md font-medium transition-all",
+          "px-8 py-3 transition-all",
+          preset.button,
           variant === 'primary' ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground border"
         )}
       >
@@ -79,6 +115,9 @@ export const ButtonBlock = ({ label, variant, isEditing, style }: any) => {
 
 export const ImageBlock = ({ src, alt, isEditing, style }: any) => {
   const s = style || DEFAULT_STYLE;
+  const { themePreset } = useBuilderStore();
+  const preset = getPresetClasses(themePreset);
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20, scale: 0.95 }}
@@ -86,13 +125,16 @@ export const ImageBlock = ({ src, alt, isEditing, style }: any) => {
       transition={{ duration: 0.6 }}
       className={cn(s.padding, s.bgColor, s.textColor, "max-w-4xl mx-auto px-4", isEditing && "cursor-pointer hover:bg-muted/50 rounded-md transition-colors")}
     >
-      <img src={src} alt={alt} className="w-full h-auto rounded-md shadow-2xl object-cover" referrerPolicy="no-referrer" />
+      <img src={src} alt={alt} className={cn("w-full h-auto shadow-2xl object-cover", themePreset === 'brutalist' ? "border-4 border-black" : "rounded-2xl")} referrerPolicy="no-referrer" />
     </motion.div>
   );
 };
 
 export const CardBlock = ({ title, content, isEditing, style }: any) => {
   const s = style || DEFAULT_STYLE;
+  const { themePreset } = useBuilderStore();
+  const preset = getPresetClasses(themePreset);
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -102,9 +144,9 @@ export const CardBlock = ({ title, content, isEditing, style }: any) => {
     >
       <motion.div 
         whileHover={{ y: -5 }}
-        className="bg-card border rounded-md p-8 shadow-lg"
+        className={cn("p-8", preset.card)}
       >
-        <h3 className="text-2xl font-bold mb-4">{title}</h3>
+        <h3 className={cn("text-2xl mb-4", preset.heading)}>{title}</h3>
         <p className="text-muted-foreground">{content}</p>
       </motion.div>
     </motion.div>
@@ -113,6 +155,9 @@ export const CardBlock = ({ title, content, isEditing, style }: any) => {
 
 export const PricingBlock = ({ title, price, features, isEditing, style }: any) => {
   const s = style || DEFAULT_STYLE;
+  const { themePreset } = useBuilderStore();
+  const preset = getPresetClasses(themePreset);
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -122,11 +167,12 @@ export const PricingBlock = ({ title, price, features, isEditing, style }: any) 
     >
       <motion.div 
         whileHover={{ y: -10, scale: 1.02 }}
-        className="bg-card border-2 border-primary/20 rounded-md p-8 shadow-lg text-center"
+        className={cn("p-8 text-center", preset.card, themePreset === 'modern' && "border-2 border-primary/20")}
       >
-        <h3 className="text-xl font-bold mb-2">{title}</h3>
-        <div className="text-4xl font-extrabold mb-4 text-primary">{price}</div>
-        <p className="text-muted-foreground text-sm">{features}</p>
+        <h3 className={cn("text-xl mb-2", preset.heading)}>{title}</h3>
+        <div className="text-5xl font-black mb-4 text-primary">{price}</div>
+        <p className="text-muted-foreground text-sm mb-8">{features}</p>
+        <button className={cn("w-full py-3 bg-primary text-primary-foreground", preset.button)}>Choose Plan</button>
       </motion.div>
     </motion.div>
   );
@@ -134,6 +180,9 @@ export const PricingBlock = ({ title, price, features, isEditing, style }: any) 
 
 export const ContactBlock = ({ title, email, isEditing, style }: any) => {
   const s = style || DEFAULT_STYLE;
+  const { themePreset } = useBuilderStore();
+  const preset = getPresetClasses(themePreset);
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -143,10 +192,10 @@ export const ContactBlock = ({ title, email, isEditing, style }: any) => {
     >
       <motion.div 
         whileHover={{ y: -5 }}
-        className="bg-card border rounded-md p-8 shadow-lg"
+        className={cn("p-8", preset.card)}
       >
-        <h3 className="text-2xl font-bold mb-4">{title}</h3>
-        <p className="text-muted-foreground">Email: {email}</p>
+        <h3 className={cn("text-2xl mb-4", preset.heading)}>{title}</h3>
+        <p className="text-muted-foreground">Email: <span className="text-primary font-bold">{email}</span></p>
       </motion.div>
     </motion.div>
   );
@@ -154,6 +203,9 @@ export const ContactBlock = ({ title, email, isEditing, style }: any) => {
 
 export const ContactFormBlock = ({ title, email, message, isEditing, style }: any) => {
   const s = style || DEFAULT_STYLE;
+  const { themePreset } = useBuilderStore();
+  const preset = getPresetClasses(themePreset);
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -163,13 +215,13 @@ export const ContactFormBlock = ({ title, email, message, isEditing, style }: an
     >
       <motion.div 
         whileHover={{ y: -5 }}
-        className="bg-card border rounded-md p-8 shadow-lg space-y-4"
+        className={cn("p-8 space-y-4", preset.card)}
       >
-        <h3 className="text-2xl font-bold mb-4">{title}</h3>
-        <input type="text" placeholder="Your Name" className="w-full p-2 border rounded-md" />
-        <input type="email" placeholder={email} className="w-full p-2 border rounded-md" />
-        <textarea placeholder={message} className="w-full p-2 border rounded-md" rows={4} />
-        <button className="w-full bg-primary text-primary-foreground p-2 rounded-md font-bold">Send Message</button>
+        <h3 className={cn("text-2xl mb-4", preset.heading)}>{title}</h3>
+        <input type="text" placeholder="Your Name" className="w-full p-3 border rounded-md bg-background focus:ring-2 focus:ring-primary outline-none transition-all" />
+        <input type="email" placeholder={email} className="w-full p-3 border rounded-md bg-background focus:ring-2 focus:ring-primary outline-none transition-all" />
+        <textarea placeholder={message} className="w-full p-3 border rounded-md bg-background focus:ring-2 focus:ring-primary outline-none transition-all" rows={4} />
+        <button className={cn("w-full bg-primary text-primary-foreground p-3 transition-all", preset.button)}>Send Message</button>
       </motion.div>
     </motion.div>
   );
@@ -177,6 +229,9 @@ export const ContactFormBlock = ({ title, email, message, isEditing, style }: an
 
 export const FeaturesBlock = ({ title, features, isEditing, style }: any) => {
   const s = style || DEFAULT_STYLE;
+  const { themePreset } = useBuilderStore();
+  const preset = getPresetClasses(themePreset);
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -184,19 +239,19 @@ export const FeaturesBlock = ({ title, features, isEditing, style }: any) => {
       transition={{ duration: 0.6 }}
       className={cn(s.padding, s.bgColor, s.textColor, "max-w-6xl mx-auto px-4", isEditing && "cursor-pointer hover:bg-muted/50 rounded-md transition-colors")}
     >
-      <h2 className="text-3xl font-bold text-center mb-12">{title}</h2>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <h2 className={cn("text-4xl text-center mb-16", preset.heading)}>{title}</h2>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
         {(features || []).map((feature: any, i: number) => (
           <motion.div 
             key={i}
-            whileHover={{ y: -5 }}
-            className="bg-card border rounded-md p-6 shadow-sm"
+            whileHover={{ y: -10 }}
+            className={cn("p-8 transition-all", preset.card)}
           >
-            <div className="h-10 w-10 bg-primary/10 rounded-md flex items-center justify-center mb-4 text-primary">
-              <div className="h-5 w-5 bg-primary rounded-full opacity-20" />
+            <div className="h-14 w-14 bg-primary/10 rounded-xl flex items-center justify-center mb-6 text-primary">
+              <div className="h-6 w-6 bg-primary rounded-full opacity-30 animate-pulse" />
             </div>
-            <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
-            <p className="text-muted-foreground text-sm">{feature.description}</p>
+            <h3 className={cn("text-xl mb-3", preset.heading)}>{feature.title}</h3>
+            <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
           </motion.div>
         ))}
       </div>
@@ -206,6 +261,9 @@ export const FeaturesBlock = ({ title, features, isEditing, style }: any) => {
 
 export const TestimonialsBlock = ({ title, testimonials, isEditing, style }: any) => {
   const s = style || DEFAULT_STYLE;
+  const { themePreset } = useBuilderStore();
+  const preset = getPresetClasses(themePreset);
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -213,23 +271,23 @@ export const TestimonialsBlock = ({ title, testimonials, isEditing, style }: any
       transition={{ duration: 0.6 }}
       className={cn(s.padding, s.bgColor, s.textColor, "max-w-6xl mx-auto px-4", isEditing && "cursor-pointer hover:bg-muted/50 rounded-md transition-colors")}
     >
-      <h2 className="text-3xl font-bold text-center mb-12">{title}</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <h2 className={cn("text-4xl text-center mb-16", preset.heading)}>{title}</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
         {(testimonials || []).map((t: any, i: number) => (
           <motion.div 
             key={i}
             whileHover={{ y: -5 }}
-            className="bg-card border rounded-md p-8 shadow-lg italic relative"
+            className={cn("p-10 italic relative overflow-hidden", preset.card)}
           >
-            <div className="text-4xl text-primary/20 absolute top-4 left-4 font-serif">"</div>
-            <p className="mb-6 relative z-10">{t.content}</p>
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center font-bold text-primary">
+            <div className="text-6xl text-primary/10 absolute -top-2 -left-2 font-serif">"</div>
+            <p className="mb-8 relative z-10 text-lg leading-relaxed">{t.content}</p>
+            <div className="flex items-center gap-4">
+              <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center font-black text-primary border-2 border-primary/10">
                 {t.author?.[0]}
               </div>
               <div>
-                <div className="font-bold text-sm">{t.author}</div>
-                <div className="text-xs text-muted-foreground">{t.role}</div>
+                <div className={cn("text-sm", preset.heading)}>{t.author}</div>
+                <div className="text-xs text-muted-foreground uppercase tracking-widest font-bold">{t.role}</div>
               </div>
             </div>
           </motion.div>
@@ -241,6 +299,9 @@ export const TestimonialsBlock = ({ title, testimonials, isEditing, style }: any
 
 export const FAQBlock = ({ title, items, isEditing, style }: any) => {
   const s = style || DEFAULT_STYLE;
+  const { themePreset } = useBuilderStore();
+  const preset = getPresetClasses(themePreset);
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -248,19 +309,23 @@ export const FAQBlock = ({ title, items, isEditing, style }: any) => {
       transition={{ duration: 0.6 }}
       className={cn(s.padding, s.bgColor, s.textColor, "max-w-3xl mx-auto px-4", isEditing && "cursor-pointer hover:bg-muted/50 rounded-md transition-colors")}
     >
-      <h2 className="text-3xl font-bold text-center mb-12">{title}</h2>
-      <div className="space-y-4">
+      <h2 className={cn("text-4xl text-center mb-16", preset.heading)}>{title}</h2>
+      <div className="space-y-6">
         {(items || []).map((item: any, i: number) => (
           <motion.div 
             key={i}
-            className="bg-card border rounded-md p-6"
+            className={cn("p-8", preset.card)}
           >
-            <h3 className="text-lg font-bold mb-2 flex items-center gap-2">
-              <span className="text-primary">Q:</span> {item.question}
+            <h3 className={cn("text-xl mb-4 flex items-center gap-3", preset.heading)}>
+              <span className="h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-black">Q</span> 
+              {item.question}
             </h3>
-            <p className="text-muted-foreground">
-              <span className="text-muted-foreground/50">A:</span> {item.answer}
-            </p>
+            <div className="flex gap-3">
+              <span className="h-8 w-8 rounded-full bg-muted text-muted-foreground flex items-center justify-center text-xs font-black shrink-0">A</span>
+              <p className="text-muted-foreground leading-relaxed pt-1">
+                {item.answer}
+              </p>
+            </div>
           </motion.div>
         ))}
       </div>
@@ -271,25 +336,27 @@ export const FAQBlock = ({ title, items, isEditing, style }: any) => {
 export const NavbarBlock = ({ logo, links, isEditing, style }: any) => {
   const [isOpen, setIsOpen] = useState(false);
   const s = style || DEFAULT_STYLE;
+  const { themePreset } = useBuilderStore();
+  const preset = getPresetClasses(themePreset);
 
   return (
     <motion.nav 
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
-      className={cn(s.padding, s.bgColor, s.textColor, "bg-background/80 backdrop-blur-md border-b sticky top-0 z-40 px-4 md:px-8", isEditing && "cursor-pointer hover:bg-muted/50 rounded-md transition-colors")}
+      className={cn(s.padding, s.bgColor, s.textColor, "bg-background/80 backdrop-blur-md border-b sticky top-0 z-40 px-4 md:px-12", isEditing && "cursor-pointer hover:bg-muted/50 rounded-md transition-colors")}
     >
-      <div className="flex items-center justify-between h-16">
-        <div className="text-xl font-black tracking-tighter text-primary uppercase italic">{logo}</div>
+      <div className="flex items-center justify-between h-20">
+        <div className={cn("text-2xl", preset.heading, "text-primary italic")}>{logo}</div>
         
         {/* Desktop Links */}
-        <div className="hidden md:flex items-center gap-8">
+        <div className="hidden md:flex items-center gap-10">
           {(links || []).map((link: any, i: number) => (
             <a key={i} href={link.href} className="text-sm font-bold hover:text-primary transition-colors uppercase tracking-widest">
               {link.label}
             </a>
           ))}
-          <button className="bg-primary text-primary-foreground px-4 py-2 rounded-md text-xs font-bold uppercase tracking-widest shadow-lg">
+          <button className={cn("px-6 py-2 bg-primary text-primary-foreground text-xs", preset.button)}>
             Get Started
           </button>
         </div>
@@ -312,7 +379,7 @@ export const NavbarBlock = ({ logo, links, isEditing, style }: any) => {
             exit={{ opacity: 0, height: 0 }}
             className="md:hidden border-t overflow-hidden bg-background"
           >
-            <div className="flex flex-col gap-4 py-6">
+            <div className="flex flex-col gap-6 py-8">
               {(links || []).map((link: any, i: number) => (
                 <a 
                   key={i} 
@@ -323,7 +390,7 @@ export const NavbarBlock = ({ logo, links, isEditing, style }: any) => {
                   {link.label}
                 </a>
               ))}
-              <button className="w-full bg-primary text-primary-foreground px-4 py-3 rounded-md text-xs font-bold uppercase tracking-widest shadow-lg mt-2">
+              <button className={cn("w-full bg-primary text-primary-foreground py-4 text-xs mt-2", preset.button)}>
                 Get Started
               </button>
             </div>
@@ -336,6 +403,9 @@ export const NavbarBlock = ({ logo, links, isEditing, style }: any) => {
 
 export const FooterBlock = ({ text, links, isEditing, style }: any) => {
   const s = style || DEFAULT_STYLE;
+  const { themePreset } = useBuilderStore();
+  const preset = getPresetClasses(themePreset);
+
   return (
     <motion.footer 
       initial={{ opacity: 0, y: 20 }}
@@ -343,9 +413,9 @@ export const FooterBlock = ({ text, links, isEditing, style }: any) => {
       transition={{ duration: 0.6 }}
       className={cn(s.padding, s.bgColor, s.textColor, "border-t bg-muted/30", isEditing && "cursor-pointer hover:bg-muted/50 rounded-md transition-colors")}
     >
-      <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
+      <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-10">
         <div className="text-sm text-muted-foreground font-medium">{text}</div>
-        <div className="flex items-center gap-8">
+        <div className="flex items-center gap-10">
           {(links || []).map((link: any, i: number) => (
             <a key={i} href={link.href} className="text-xs font-bold hover:text-primary transition-colors uppercase tracking-widest">
               {link.label}
