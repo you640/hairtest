@@ -149,18 +149,18 @@ export function VisualBuilder() {
         <div className="mx-auto max-w-5xl py-20">
           {blocks.map((block) => (
             <div key={block.id}>
-              {block.type === 'hero' && <HeroBlock {...block.props} />}
-              {block.type === 'text' && <TextBlock {...block.props} />}
-              {block.type === 'button' && <ButtonBlock {...block.props} />}
-              {block.type === 'image' && <ImageBlock {...block.props} />}
-              {block.type === 'card' && <CardBlock {...block.props} />}
-              {block.type === 'pricing' && <PricingBlock {...block.props} />}
-              {block.type === 'contact' && <ContactBlock {...block.props} />}
-              {block.type === 'features' && <FeaturesBlock {...block.props} />}
-              {block.type === 'testimonials' && <TestimonialsBlock {...block.props} />}
-              {block.type === 'faq' && <FAQBlock {...block.props} />}
-              {block.type === 'navbar' && <NavbarBlock {...block.props} />}
-              {block.type === 'footer' && <FooterBlock {...block.props} />}
+              {block.type === 'hero' && <HeroBlock {...block.props} style={block.style} />}
+              {block.type === 'text' && <TextBlock {...block.props} style={block.style} />}
+              {block.type === 'button' && <ButtonBlock {...block.props} style={block.style} />}
+              {block.type === 'image' && <ImageBlock {...block.props} style={block.style} />}
+              {block.type === 'card' && <CardBlock {...block.props} style={block.style} />}
+              {block.type === 'pricing' && <PricingBlock {...block.props} style={block.style} />}
+              {block.type === 'contact' && <ContactBlock {...block.props} style={block.style} />}
+              {block.type === 'features' && <FeaturesBlock {...block.props} style={block.style} />}
+              {block.type === 'testimonials' && <TestimonialsBlock {...block.props} style={block.style} />}
+              {block.type === 'faq' && <FAQBlock {...block.props} style={block.style} />}
+              {block.type === 'navbar' && <NavbarBlock {...block.props} style={block.style} />}
+              {block.type === 'footer' && <FooterBlock {...block.props} style={block.style} />}
             </div>
           ))}
         </div>
