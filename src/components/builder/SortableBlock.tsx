@@ -41,18 +41,18 @@ export function SortableBlock({ block, onAiEdit }: { block: Block, onAiEdit?: (i
 
   const renderContent = () => {
     switch (block.type) {
-      case 'hero': return <HeroBlock {...block.props} isEditing />;
-      case 'text': return <TextBlock {...block.props} isEditing />;
-      case 'button': return <ButtonBlock {...block.props} isEditing />;
-      case 'image': return <ImageBlock {...block.props} isEditing />;
-      case 'card': return <CardBlock {...block.props} isEditing />;
-      case 'pricing': return <PricingBlock {...block.props} isEditing />;
-      case 'contact': return <ContactBlock {...block.props} isEditing />;
-      case 'features': return <FeaturesBlock {...block.props} isEditing />;
-      case 'testimonials': return <TestimonialsBlock {...block.props} isEditing />;
-      case 'faq': return <FAQBlock {...block.props} isEditing />;
-      case 'navbar': return <NavbarBlock {...block.props} isEditing />;
-      case 'footer': return <FooterBlock {...block.props} isEditing />;
+      case 'hero': return <HeroBlock {...block.props} style={block.style} isEditing />;
+      case 'text': return <TextBlock {...block.props} style={block.style} isEditing />;
+      case 'button': return <ButtonBlock {...block.props} style={block.style} isEditing />;
+      case 'image': return <ImageBlock {...block.props} style={block.style} isEditing />;
+      case 'card': return <CardBlock {...block.props} style={block.style} isEditing />;
+      case 'pricing': return <PricingBlock {...block.props} style={block.style} isEditing />;
+      case 'contact': return <ContactBlock {...block.props} style={block.style} isEditing />;
+      case 'features': return <FeaturesBlock {...block.props} style={block.style} isEditing />;
+      case 'testimonials': return <TestimonialsBlock {...block.props} style={block.style} isEditing />;
+      case 'faq': return <FAQBlock {...block.props} style={block.style} isEditing />;
+      case 'navbar': return <NavbarBlock {...block.props} style={block.style} isEditing />;
+      case 'footer': return <FooterBlock {...block.props} style={block.style} isEditing />;
       default: return null;
     }
   };

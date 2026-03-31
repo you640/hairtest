@@ -1,19 +1,21 @@
-import { ReactNode } from 'react';
+import { ReactNode, useState } from 'react';
 import { cn } from '@/src/lib/utils';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
+import { Menu, X } from 'lucide-react';
+import { DEFAULT_STYLE } from '@/src/lib/builderStore';
 
-export const HeroBlock = ({ title, subtitle, cta, isEditing }: any) => (
+export const HeroBlock = ({ title, subtitle, cta, isEditing, style = DEFAULT_STYLE }: any) => (
   <motion.section 
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.6 }}
-    className={cn("py-20 text-center px-4", isEditing && "cursor-pointer hover:bg-muted/50 rounded-md transition-colors")}
+    className={cn(style.padding, style.bgColor, style.textColor, isEditing && "cursor-pointer hover:bg-muted/50 rounded-md transition-colors")}
   >
     <motion.h1 
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.1 }}
-      className="text-5xl font-extrabold tracking-tight mb-6"
+      className="text-4xl md:text-6xl font-extrabold tracking-tight mb-6 leading-tight"
     >
       {title}
     </motion.h1>
@@ -21,7 +23,7 @@ export const HeroBlock = ({ title, subtitle, cta, isEditing }: any) => (
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2 }}
-      className="text-xl text-muted-foreground max-w-2xl mx-auto mb-10"
+      className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 px-4"
     >
       {subtitle}
     </motion.p>
@@ -35,23 +37,23 @@ export const HeroBlock = ({ title, subtitle, cta, isEditing }: any) => (
   </motion.section>
 );
 
-export const TextBlock = ({ content, isEditing }: any) => (
+export const TextBlock = ({ content, isEditing, style = DEFAULT_STYLE }: any) => (
   <motion.div 
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.6 }}
-    className={cn("py-8 max-w-3xl mx-auto px-4 prose prose-lg dark:prose-invert", isEditing && "cursor-pointer hover:bg-muted/50 rounded-md transition-colors")}
+    className={cn(style.padding, style.bgColor, style.textColor, "max-w-3xl mx-auto prose prose-base md:prose-lg dark:prose-invert px-4", isEditing && "cursor-pointer hover:bg-muted/50 rounded-md transition-colors")}
   >
     <p>{content}</p>
   </motion.div>
 );
 
-export const ButtonBlock = ({ label, variant, isEditing }: any) => (
+export const ButtonBlock = ({ label, variant, isEditing, style = DEFAULT_STYLE }: any) => (
   <motion.div 
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.6 }}
-    className={cn("py-4 flex justify-center", isEditing && "cursor-pointer hover:bg-muted/50 rounded-md transition-colors")}
+    className={cn(style.padding, style.bgColor, style.textColor, "flex justify-center", isEditing && "cursor-pointer hover:bg-muted/50 rounded-md transition-colors")}
   >
     <motion.button 
       whileHover={{ scale: 1.05 }}
@@ -66,23 +68,23 @@ export const ButtonBlock = ({ label, variant, isEditing }: any) => (
   </motion.div>
 );
 
-export const ImageBlock = ({ src, alt, isEditing }: any) => (
+export const ImageBlock = ({ src, alt, isEditing, style = DEFAULT_STYLE }: any) => (
   <motion.div 
     initial={{ opacity: 0, y: 20, scale: 0.95 }}
     animate={{ opacity: 1, y: 0, scale: 1 }}
     transition={{ duration: 0.6 }}
-    className={cn("py-8 max-w-4xl mx-auto px-4", isEditing && "cursor-pointer hover:bg-muted/50 rounded-md transition-colors")}
+    className={cn(style.padding, style.bgColor, style.textColor, "max-w-4xl mx-auto px-4", isEditing && "cursor-pointer hover:bg-muted/50 rounded-md transition-colors")}
   >
     <img src={src} alt={alt} className="w-full h-auto rounded-md shadow-2xl object-cover" referrerPolicy="no-referrer" />
   </motion.div>
 );
 
-export const CardBlock = ({ title, content, isEditing }: any) => (
+export const CardBlock = ({ title, content, isEditing, style = DEFAULT_STYLE }: any) => (
   <motion.div 
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.6 }}
-    className={cn("py-8 max-w-md mx-auto px-4", isEditing && "cursor-pointer hover:bg-muted/50 rounded-md transition-colors")}
+    className={cn(style.padding, style.bgColor, style.textColor, "max-w-md mx-auto px-4", isEditing && "cursor-pointer hover:bg-muted/50 rounded-md transition-colors")}
   >
     <motion.div 
       whileHover={{ y: -5 }}
@@ -94,12 +96,12 @@ export const CardBlock = ({ title, content, isEditing }: any) => (
   </motion.div>
 );
 
-export const PricingBlock = ({ title, price, features, isEditing }: any) => (
+export const PricingBlock = ({ title, price, features, isEditing, style = DEFAULT_STYLE }: any) => (
   <motion.div 
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.6 }}
-    className={cn("py-8 max-w-sm mx-auto px-4", isEditing && "cursor-pointer hover:bg-muted/50 rounded-md transition-colors")}
+    className={cn(style.padding, style.bgColor, style.textColor, "max-w-sm mx-auto px-4", isEditing && "cursor-pointer hover:bg-muted/50 rounded-md transition-colors")}
   >
     <motion.div 
       whileHover={{ y: -10, scale: 1.02 }}
@@ -112,12 +114,12 @@ export const PricingBlock = ({ title, price, features, isEditing }: any) => (
   </motion.div>
 );
 
-export const ContactBlock = ({ title, email, isEditing }: any) => (
+export const ContactBlock = ({ title, email, isEditing, style = DEFAULT_STYLE }: any) => (
   <motion.div 
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.6 }}
-    className={cn("py-8 max-w-md mx-auto px-4", isEditing && "cursor-pointer hover:bg-muted/50 rounded-md transition-colors")}
+    className={cn(style.padding, style.bgColor, style.textColor, "max-w-md mx-auto px-4", isEditing && "cursor-pointer hover:bg-muted/50 rounded-md transition-colors")}
   >
     <motion.div 
       whileHover={{ y: -5 }}
@@ -129,12 +131,12 @@ export const ContactBlock = ({ title, email, isEditing }: any) => (
   </motion.div>
 );
 
-export const FeaturesBlock = ({ title, features, isEditing }: any) => (
+export const FeaturesBlock = ({ title, features, isEditing, style = DEFAULT_STYLE }: any) => (
   <motion.div 
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.6 }}
-    className={cn("py-16 max-w-6xl mx-auto px-4", isEditing && "cursor-pointer hover:bg-muted/50 rounded-md transition-colors")}
+    className={cn(style.padding, style.bgColor, style.textColor, "max-w-6xl mx-auto px-4", isEditing && "cursor-pointer hover:bg-muted/50 rounded-md transition-colors")}
   >
     <h2 className="text-3xl font-bold text-center mb-12">{title}</h2>
     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -155,12 +157,12 @@ export const FeaturesBlock = ({ title, features, isEditing }: any) => (
   </motion.div>
 );
 
-export const TestimonialsBlock = ({ title, testimonials, isEditing }: any) => (
+export const TestimonialsBlock = ({ title, testimonials, isEditing, style = DEFAULT_STYLE }: any) => (
   <motion.div 
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.6 }}
-    className={cn("py-16 max-w-6xl mx-auto px-4", isEditing && "cursor-pointer hover:bg-muted/50 rounded-md transition-colors")}
+    className={cn(style.padding, style.bgColor, style.textColor, "max-w-6xl mx-auto px-4", isEditing && "cursor-pointer hover:bg-muted/50 rounded-md transition-colors")}
   >
     <h2 className="text-3xl font-bold text-center mb-12">{title}</h2>
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -187,12 +189,12 @@ export const TestimonialsBlock = ({ title, testimonials, isEditing }: any) => (
   </motion.div>
 );
 
-export const FAQBlock = ({ title, items, isEditing }: any) => (
+export const FAQBlock = ({ title, items, isEditing, style = DEFAULT_STYLE }: any) => (
   <motion.div 
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.6 }}
-    className={cn("py-16 max-w-3xl mx-auto px-4", isEditing && "cursor-pointer hover:bg-muted/50 rounded-md transition-colors")}
+    className={cn(style.padding, style.bgColor, style.textColor, "max-w-3xl mx-auto px-4", isEditing && "cursor-pointer hover:bg-muted/50 rounded-md transition-colors")}
   >
     <h2 className="text-3xl font-bold text-center mb-12">{title}</h2>
     <div className="space-y-4">
@@ -213,33 +215,77 @@ export const FAQBlock = ({ title, items, isEditing }: any) => (
   </motion.div>
 );
 
-export const NavbarBlock = ({ logo, links, isEditing }: any) => (
-  <motion.nav 
-    initial={{ opacity: 0, y: -20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.6 }}
-    className={cn("py-4 px-8 flex items-center justify-between bg-background/80 backdrop-blur-md border-b sticky top-0 z-40", isEditing && "cursor-pointer hover:bg-muted/50 rounded-md transition-colors")}
-  >
-    <div className="text-xl font-black tracking-tighter text-primary uppercase italic">{logo}</div>
-    <div className="hidden md:flex items-center gap-8">
-      {(links || []).map((link: any, i: number) => (
-        <a key={i} href={link.href} className="text-sm font-bold hover:text-primary transition-colors uppercase tracking-widest">
-          {link.label}
-        </a>
-      ))}
-    </div>
-    <button className="bg-primary text-primary-foreground px-4 py-2 rounded-md text-xs font-bold uppercase tracking-widest shadow-lg">
-      Get Started
-    </button>
-  </motion.nav>
-);
+export const NavbarBlock = ({ logo, links, isEditing, style = DEFAULT_STYLE }: any) => {
+  const [isOpen, setIsOpen] = useState(false);
 
-export const FooterBlock = ({ text, links, isEditing }: any) => (
+  return (
+    <motion.nav 
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+      className={cn(style.padding, style.bgColor, style.textColor, "bg-background/80 backdrop-blur-md border-b sticky top-0 z-40 px-4 md:px-8", isEditing && "cursor-pointer hover:bg-muted/50 rounded-md transition-colors")}
+    >
+      <div className="flex items-center justify-between h-16">
+        <div className="text-xl font-black tracking-tighter text-primary uppercase italic">{logo}</div>
+        
+        {/* Desktop Links */}
+        <div className="hidden md:flex items-center gap-8">
+          {(links || []).map((link: any, i: number) => (
+            <a key={i} href={link.href} className="text-sm font-bold hover:text-primary transition-colors uppercase tracking-widest">
+              {link.label}
+            </a>
+          ))}
+          <button className="bg-primary text-primary-foreground px-4 py-2 rounded-md text-xs font-bold uppercase tracking-widest shadow-lg">
+            Get Started
+          </button>
+        </div>
+
+        {/* Mobile Menu Button */}
+        <button 
+          onClick={() => setIsOpen(!isOpen)}
+          className="md:hidden p-2 text-muted-foreground hover:text-primary transition-colors"
+        >
+          {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+        </button>
+      </div>
+
+      {/* Mobile Menu */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="md:hidden border-t overflow-hidden bg-background"
+          >
+            <div className="flex flex-col gap-4 py-6">
+              {(links || []).map((link: any, i: number) => (
+                <a 
+                  key={i} 
+                  href={link.href} 
+                  onClick={() => setIsOpen(false)}
+                  className="text-sm font-bold hover:text-primary transition-colors uppercase tracking-widest px-2"
+                >
+                  {link.label}
+                </a>
+              ))}
+              <button className="w-full bg-primary text-primary-foreground px-4 py-3 rounded-md text-xs font-bold uppercase tracking-widest shadow-lg mt-2">
+                Get Started
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.nav>
+  );
+};
+
+export const FooterBlock = ({ text, links, isEditing, style = DEFAULT_STYLE }: any) => (
   <motion.footer 
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.6 }}
-    className={cn("py-12 px-8 border-t bg-muted/30", isEditing && "cursor-pointer hover:bg-muted/50 rounded-md transition-colors")}
+    className={cn(style.padding, style.bgColor, style.textColor, "border-t bg-muted/30", isEditing && "cursor-pointer hover:bg-muted/50 rounded-md transition-colors")}
   >
     <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
       <div className="text-sm text-muted-foreground font-medium">{text}</div>

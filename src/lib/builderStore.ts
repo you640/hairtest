@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { nanoid } from 'nanoid';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc, collection, getDocs } from 'firebase/firestore';
 import { db, auth } from '@/src/firebase';
 
 export type BlockType = 'hero' | 'text' | 'button' | 'image' | 'grid' | 'card' | 'pricing' | 'contact' | 'features' | 'testimonials' | 'faq' | 'navbar' | 'footer';
@@ -12,6 +12,11 @@ export interface Block {
   id: string;
   type: BlockType;
   props: Record<string, any>;
+  style: {
+    bgColor: string;
+    textColor: string;
+    padding: string;
+  };
 }
 
 interface BuilderState {
@@ -20,25 +25,34 @@ interface BuilderState {
   aiAnimation: AiAnimationType;
   aiAnimationSpeed: number;
   theme: ThemeType;
+  pageTheme: string;
   wpConfig: {
     url: string;
     username: string;
     appPassword: string;
   };
-  addBlock: (type: BlockType, props?: Record<string, any>) => void;
+  addBlock: (type: BlockType, props?: Record<string, any>, style?: Partial<Block['style']>) => void;
   removeBlock: (id: string) => void;
-  updateBlock: (id: string, props: Record<string, any>) => void;
+  updateBlock: (id: string, props?: Record<string, any>, style?: Partial<Block['style']>) => void;
   setSelectedBlock: (id: string | null) => void;
   moveBlock: (activeId: string, overId: string) => void;
   setBlocks: (blocks: Block[]) => void;
   setAiAnimation: (type: AiAnimationType) => void;
   setAiAnimationSpeed: (speed: number) => void;
   setTheme: (theme: ThemeType) => void;
+  setPageTheme: (theme: string) => void;
   setWpConfig: (config: Partial<BuilderState['wpConfig']>) => void;
   duplicateBlock: (id: string) => void;
   saveProject: (name: string) => Promise<void>;
   loadProject: (id: string) => Promise<void>;
+  listProjects: () => Promise<{ id: string; name: string; createdAt: string }[]>;
 }
+
+export const DEFAULT_STYLE = {
+  bgColor: 'bg-background',
+  textColor: 'text-foreground',
+  padding: 'p-8',
+};
 
 const DEFAULT_PROPS: Record<BlockType, any> = {
   hero: { title: 'New Hero Section', subtitle: 'Describe your product here.', cta: 'Get Started' },
@@ -93,27 +107,33 @@ export const useBuilderStore = create<BuilderState>()(
   persist(
     (set, get) => ({
       blocks: [
-        { id: nanoid(), type: 'hero', props: DEFAULT_PROPS.hero },
-        { id: nanoid(), type: 'text', props: DEFAULT_PROPS.text },
+        { id: nanoid(), type: 'hero', props: DEFAULT_PROPS.hero, style: DEFAULT_STYLE },
+        { id: nanoid(), type: 'testimonials', props: DEFAULT_PROPS.testimonials, style: DEFAULT_STYLE },
+        { id: nanoid(), type: 'text', props: DEFAULT_PROPS.text, style: DEFAULT_STYLE },
       ],
       selectedBlockId: null,
       aiAnimation: 'zero-g',
       aiAnimationSpeed: 1,
       theme: 'light',
+      pageTheme: 'Professional Business',
       wpConfig: {
         url: '',
         username: '',
         appPassword: '',
       },
-      addBlock: (type, props = {}) => set((state) => ({
-        blocks: [...state.blocks, { id: nanoid(), type, props: { ...DEFAULT_PROPS[type], ...props } }]
+      addBlock: (type, props = {}, style = {}) => set((state) => ({
+        blocks: [...state.blocks, { id: nanoid(), type, props: { ...DEFAULT_PROPS[type], ...props }, style: { ...DEFAULT_STYLE, ...style } }]
       })),
       removeBlock: (id) => set((state) => ({
         blocks: state.blocks.filter((b) => b.id !== id),
         selectedBlockId: state.selectedBlockId === id ? null : state.selectedBlockId
       })),
-      updateBlock: (id, props) => set((state) => ({
-        blocks: state.blocks.map((b) => b.id === id ? { ...b, props: { ...b.props, ...props } } : b)
+      updateBlock: (id, props = {}, style = {}) => set((state) => ({
+        blocks: state.blocks.map((b) => b.id === id ? { 
+          ...b, 
+          props: { ...b.props, ...props },
+          style: { ...(b.style || DEFAULT_STYLE), ...style }
+        } : b)
       })),
       setSelectedBlock: (id) => set({ selectedBlockId: id }),
       moveBlock: (activeId, overId) => set((state) => {
@@ -137,6 +157,7 @@ export const useBuilderStore = create<BuilderState>()(
       setAiAnimation: (type) => set({ aiAnimation: type }),
       setAiAnimationSpeed: (speed) => set({ aiAnimationSpeed: speed }),
       setTheme: (theme) => set({ theme }),
+      setPageTheme: (theme) => set({ pageTheme: theme }),
       setWpConfig: (config) => set((state) => ({
         wpConfig: { ...state.wpConfig, ...config }
       })),
@@ -162,6 +183,17 @@ export const useBuilderStore = create<BuilderState>()(
           const project = docSnap.data();
           set({ blocks: project.blocks });
         }
+      },
+      listProjects: async () => {
+        const user = auth.currentUser;
+        if (!user) throw new Error('User not authenticated');
+        const projectsRef = collection(db, 'users', user.uid, 'projects');
+        const querySnapshot = await getDocs(projectsRef);
+        return querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          name: doc.data().name,
+          createdAt: doc.data().createdAt
+        }));
       },
     }),
     {

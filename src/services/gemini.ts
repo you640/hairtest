@@ -2,9 +2,9 @@ import { GoogleGenAI } from "@google/genai";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 
-export async function generateContent(prompt: string) {
+export async function generateContent(prompt: string, model: string = "gemini-3-flash-preview") {
   const response = await ai.models.generateContent({
-    model: "gemini-3-flash-preview",
+    model: model,
     contents: prompt,
   });
   return response.text || "No response from AI.";
