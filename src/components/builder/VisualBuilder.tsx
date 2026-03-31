@@ -349,6 +349,7 @@ export function VisualBuilder() {
                 { type: 'navbar', icon: Layout, label: 'Navbar' },
                 { type: 'footer', icon: Layout, label: 'Footer' },
                 { type: 'contact', icon: Layout, label: 'Contact' },
+                { type: 'contactForm', icon: Layout, label: 'Contact Form' },
               ].map((item) => (
                 <button
                   key={item.type}
@@ -543,7 +544,7 @@ export function VisualBuilder() {
                 <p className="text-xs text-muted-foreground leading-relaxed">
                   {editingBlockId 
                     ? `You are currently editing a specific block. Describe the changes you want to make to it.`
-                    : `Describe what you want to build or how to modify existing blocks.`}
+                    : `Describe the entire page structure and content you want to build, or request modifications to existing blocks.`}
                 </p>
                 {editingBlockId && (
                   <button 
@@ -573,7 +574,7 @@ export function VisualBuilder() {
                 onChange={(e) => setAiPrompt(e.target.value)}
                 placeholder={editingBlockId 
                   ? "e.g., Change the title to 'Our Mission' and make the text more professional..."
-                  : "e.g., Add a pricing section, or change the hero title to 'Welcome to our site'..."}
+                  : "e.g., Build a landing page for a new coffee shop with a hero section, features, and a contact form..."}
                 className="w-full rounded-md border bg-background p-4 text-sm focus:ring-2 focus:ring-primary focus:outline-none"
                 rows={6}
               />

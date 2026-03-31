@@ -4,7 +4,7 @@ import { nanoid } from 'nanoid';
 import { doc, setDoc, getDoc, collection, getDocs } from 'firebase/firestore';
 import { db, auth } from '@/src/firebase';
 
-export type BlockType = 'hero' | 'text' | 'button' | 'image' | 'grid' | 'card' | 'pricing' | 'contact' | 'features' | 'testimonials' | 'faq' | 'navbar' | 'footer';
+export type BlockType = 'hero' | 'text' | 'button' | 'image' | 'grid' | 'card' | 'pricing' | 'contact' | 'contactForm' | 'features' | 'testimonials' | 'faq' | 'navbar' | 'footer';
 export type AiAnimationType = 'zero-g' | 'singularity' | 'magnetic' | 'none';
 export type ThemeType = 'light' | 'dark';
 
@@ -63,6 +63,7 @@ const DEFAULT_PROPS: Record<BlockType, any> = {
   card: { title: 'Card Title', content: 'Card content goes here.' },
   pricing: { title: 'Pricing Plan', price: '$29', features: 'Feature 1, Feature 2' },
   contact: { title: 'Contact Us', email: 'hello@example.com' },
+  contactForm: { title: 'Get in Touch', email: 'hello@example.com', message: 'How can we help you?' },
   features: { 
     title: 'Our Features', 
     features: [

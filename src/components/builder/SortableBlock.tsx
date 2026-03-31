@@ -9,6 +9,7 @@ import {
   CardBlock, 
   PricingBlock, 
   ContactBlock, 
+  ContactFormBlock,
   FeaturesBlock,
   TestimonialsBlock,
   FAQBlock,
@@ -48,6 +49,7 @@ export function SortableBlock({ block, onAiEdit }: { block: Block, onAiEdit?: (i
       case 'card': return <CardBlock {...block.props} style={block.style} isEditing />;
       case 'pricing': return <PricingBlock {...block.props} style={block.style} isEditing />;
       case 'contact': return <ContactBlock {...block.props} style={block.style} isEditing />;
+      case 'contactForm': return <ContactFormBlock {...block.props} style={block.style} isEditing />;
       case 'features': return <FeaturesBlock {...block.props} style={block.style} isEditing />;
       case 'testimonials': return <TestimonialsBlock {...block.props} style={block.style} isEditing />;
       case 'faq': return <FAQBlock {...block.props} style={block.style} isEditing />;

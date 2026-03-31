@@ -152,6 +152,29 @@ export const ContactBlock = ({ title, email, isEditing, style }: any) => {
   );
 };
 
+export const ContactFormBlock = ({ title, email, message, isEditing, style }: any) => {
+  const s = style || DEFAULT_STYLE;
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+      className={cn(s.padding, s.bgColor, s.textColor, "max-w-md mx-auto px-4", isEditing && "cursor-pointer hover:bg-muted/50 rounded-md transition-colors")}
+    >
+      <motion.div 
+        whileHover={{ y: -5 }}
+        className="bg-card border rounded-md p-8 shadow-lg space-y-4"
+      >
+        <h3 className="text-2xl font-bold mb-4">{title}</h3>
+        <input type="text" placeholder="Your Name" className="w-full p-2 border rounded-md" />
+        <input type="email" placeholder={email} className="w-full p-2 border rounded-md" />
+        <textarea placeholder={message} className="w-full p-2 border rounded-md" rows={4} />
+        <button className="w-full bg-primary text-primary-foreground p-2 rounded-md font-bold">Send Message</button>
+      </motion.div>
+    </motion.div>
+  );
+};
+
 export const FeaturesBlock = ({ title, features, isEditing, style }: any) => {
   const s = style || DEFAULT_STYLE;
   return (
