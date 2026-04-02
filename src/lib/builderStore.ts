@@ -16,6 +16,11 @@ export interface Block {
     bgColor: string;
     textColor: string;
     padding: string;
+    borderRadius?: string;
+    shadow?: string;
+    animation?: 'none' | 'fade' | 'slideUp' | 'slideDown' | 'slideLeft' | 'slideRight' | 'scale' | 'rotate';
+    animationDuration?: number;
+    animationDelay?: number;
   };
 }
 
@@ -50,10 +55,15 @@ interface BuilderState {
   listProjects: () => Promise<{ id: string; name: string; createdAt: string }[]>;
 }
 
-export const DEFAULT_STYLE = {
+export const DEFAULT_STYLE: Block['style'] = {
   bgColor: 'bg-background',
   textColor: 'text-foreground',
   padding: 'p-8',
+  borderRadius: 'rounded-none',
+  shadow: 'shadow-none',
+  animation: 'fade',
+  animationDuration: 0.5,
+  animationDelay: 0,
 };
 
 const DEFAULT_PROPS: Record<BlockType, any> = {

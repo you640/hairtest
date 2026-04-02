@@ -33,30 +33,60 @@ const getPresetClasses = (preset: string) => {
   }
 };
 
+const getAnimationProps = (style: any): any => {
+  const { animation = 'fade', animationDuration = 0.5, animationDelay = 0 } = style || {};
+  
+  if (animation === 'none') return {};
+
+  const variants: Record<string, any> = {
+    fade: { initial: { opacity: 0 }, whileInView: { opacity: 1 } },
+    slideUp: { initial: { opacity: 0, y: 50 }, whileInView: { opacity: 1, y: 0 } },
+    slideDown: { initial: { opacity: 0, y: -50 }, whileInView: { opacity: 1, y: 0 } },
+    slideLeft: { initial: { opacity: 0, x: 50 }, whileInView: { opacity: 1, x: 0 } },
+    slideRight: { initial: { opacity: 0, x: -50 }, whileInView: { opacity: 1, x: 0 } },
+    scale: { initial: { opacity: 0, scale: 0.8 }, whileInView: { opacity: 1, scale: 1 } },
+    rotate: { initial: { opacity: 0, rotate: -10, scale: 0.9 }, whileInView: { opacity: 1, rotate: 0, scale: 1 } },
+  };
+
+  const selected = variants[animation] || variants.fade;
+
+  return {
+    initial: selected.initial,
+    whileInView: selected.whileInView,
+    viewport: { once: true, margin: "-100px" },
+    transition: { 
+      duration: animationDuration, 
+      delay: animationDelay,
+      ease: "easeOut"
+    }
+  };
+};
+
 export const HeroBlock = ({ title, subtitle, cta, isEditing, style }: any) => {
   const s = style || DEFAULT_STYLE;
   const { themePreset } = useBuilderStore();
   const preset = getPresetClasses(themePreset);
+  const anim = getAnimationProps(s);
 
   return (
     <motion.section 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6 }}
-      className={cn(s.padding, s.bgColor, s.textColor, isEditing && "cursor-pointer hover:bg-muted/50 rounded-md transition-colors")}
+      {...anim}
+      className={cn(s.padding, s.bgColor, s.textColor, s.borderRadius, s.shadow, isEditing && "cursor-pointer hover:bg-muted/50 transition-colors")}
     >
       <motion.h1 
         initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ delay: (s.animationDelay || 0) + 0.1 }}
         className={cn("text-4xl md:text-7xl mb-6 leading-tight", preset.heading)}
       >
         {title}
       </motion.h1>
       <motion.p 
         initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ delay: (s.animationDelay || 0) + 0.2 }}
         className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 px-4"
       >
         {subtitle}
@@ -74,12 +104,11 @@ export const HeroBlock = ({ title, subtitle, cta, isEditing, style }: any) => {
 
 export const TextBlock = ({ content, isEditing, style }: any) => {
   const s = style || DEFAULT_STYLE;
+  const anim = getAnimationProps(s);
   return (
     <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6 }}
-      className={cn(s.padding, s.bgColor, s.textColor, "max-w-3xl mx-auto prose prose-base md:prose-lg dark:prose-invert px-4", isEditing && "cursor-pointer hover:bg-muted/50 rounded-md transition-colors")}
+      {...anim}
+      className={cn(s.padding, s.bgColor, s.textColor, s.borderRadius, s.shadow, "max-w-3xl mx-auto prose prose-base md:prose-lg dark:prose-invert px-4", isEditing && "cursor-pointer hover:bg-muted/50 transition-colors")}
     >
       <p>{content}</p>
     </motion.div>
@@ -90,13 +119,12 @@ export const ButtonBlock = ({ label, variant, isEditing, style }: any) => {
   const s = style || DEFAULT_STYLE;
   const { themePreset } = useBuilderStore();
   const preset = getPresetClasses(themePreset);
+  const anim = getAnimationProps(s);
 
   return (
     <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6 }}
-      className={cn(s.padding, s.bgColor, s.textColor, "flex justify-center", isEditing && "cursor-pointer hover:bg-muted/50 rounded-md transition-colors")}
+      {...anim}
+      className={cn(s.padding, s.bgColor, s.textColor, s.borderRadius, s.shadow, "flex justify-center", isEditing && "cursor-pointer hover:bg-muted/50 transition-colors")}
     >
       <motion.button 
         whileHover={{ scale: 1.05 }}
@@ -117,13 +145,12 @@ export const ImageBlock = ({ src, alt, isEditing, style }: any) => {
   const s = style || DEFAULT_STYLE;
   const { themePreset } = useBuilderStore();
   const preset = getPresetClasses(themePreset);
+  const anim = getAnimationProps(s);
 
   return (
     <motion.div 
-      initial={{ opacity: 0, y: 20, scale: 0.95 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 0.6 }}
-      className={cn(s.padding, s.bgColor, s.textColor, "max-w-4xl mx-auto px-4", isEditing && "cursor-pointer hover:bg-muted/50 rounded-md transition-colors")}
+      {...anim}
+      className={cn(s.padding, s.bgColor, s.textColor, s.borderRadius, s.shadow, "max-w-4xl mx-auto px-4", isEditing && "cursor-pointer hover:bg-muted/50 transition-colors")}
     >
       <img src={src} alt={alt} className={cn("w-full h-auto shadow-2xl object-cover", themePreset === 'brutalist' ? "border-4 border-black" : "rounded-2xl")} referrerPolicy="no-referrer" />
     </motion.div>
@@ -134,13 +161,12 @@ export const CardBlock = ({ title, content, isEditing, style }: any) => {
   const s = style || DEFAULT_STYLE;
   const { themePreset } = useBuilderStore();
   const preset = getPresetClasses(themePreset);
+  const anim = getAnimationProps(s);
 
   return (
     <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6 }}
-      className={cn(s.padding, s.bgColor, s.textColor, "max-w-md mx-auto px-4", isEditing && "cursor-pointer hover:bg-muted/50 rounded-md transition-colors")}
+      {...anim}
+      className={cn(s.padding, s.bgColor, s.textColor, s.borderRadius, s.shadow, "max-w-md mx-auto px-4", isEditing && "cursor-pointer hover:bg-muted/50 transition-colors")}
     >
       <motion.div 
         whileHover={{ y: -5 }}
@@ -157,13 +183,12 @@ export const PricingBlock = ({ title, price, features, isEditing, style }: any) 
   const s = style || DEFAULT_STYLE;
   const { themePreset } = useBuilderStore();
   const preset = getPresetClasses(themePreset);
+  const anim = getAnimationProps(s);
 
   return (
     <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6 }}
-      className={cn(s.padding, s.bgColor, s.textColor, "max-w-sm mx-auto px-4", isEditing && "cursor-pointer hover:bg-muted/50 rounded-md transition-colors")}
+      {...anim}
+      className={cn(s.padding, s.bgColor, s.textColor, s.borderRadius, s.shadow, "max-w-sm mx-auto px-4", isEditing && "cursor-pointer hover:bg-muted/50 transition-colors")}
     >
       <motion.div 
         whileHover={{ y: -10, scale: 1.02 }}
@@ -182,13 +207,12 @@ export const ContactBlock = ({ title, email, isEditing, style }: any) => {
   const s = style || DEFAULT_STYLE;
   const { themePreset } = useBuilderStore();
   const preset = getPresetClasses(themePreset);
+  const anim = getAnimationProps(s);
 
   return (
     <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6 }}
-      className={cn(s.padding, s.bgColor, s.textColor, "max-w-md mx-auto px-4", isEditing && "cursor-pointer hover:bg-muted/50 rounded-md transition-colors")}
+      {...anim}
+      className={cn(s.padding, s.bgColor, s.textColor, s.borderRadius, s.shadow, "max-w-md mx-auto px-4", isEditing && "cursor-pointer hover:bg-muted/50 transition-colors")}
     >
       <motion.div 
         whileHover={{ y: -5 }}
@@ -205,13 +229,12 @@ export const ContactFormBlock = ({ title, email, message, isEditing, style }: an
   const s = style || DEFAULT_STYLE;
   const { themePreset } = useBuilderStore();
   const preset = getPresetClasses(themePreset);
+  const anim = getAnimationProps(s);
 
   return (
     <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6 }}
-      className={cn(s.padding, s.bgColor, s.textColor, "max-w-md mx-auto px-4", isEditing && "cursor-pointer hover:bg-muted/50 rounded-md transition-colors")}
+      {...anim}
+      className={cn(s.padding, s.bgColor, s.textColor, s.borderRadius, s.shadow, "max-w-md mx-auto px-4", isEditing && "cursor-pointer hover:bg-muted/50 transition-colors")}
     >
       <motion.div 
         whileHover={{ y: -5 }}
@@ -231,13 +254,12 @@ export const FeaturesBlock = ({ title, features, isEditing, style }: any) => {
   const s = style || DEFAULT_STYLE;
   const { themePreset } = useBuilderStore();
   const preset = getPresetClasses(themePreset);
+  const anim = getAnimationProps(s);
 
   return (
     <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6 }}
-      className={cn(s.padding, s.bgColor, s.textColor, "max-w-6xl mx-auto px-4", isEditing && "cursor-pointer hover:bg-muted/50 rounded-md transition-colors")}
+      {...anim}
+      className={cn(s.padding, s.bgColor, s.textColor, s.borderRadius, s.shadow, "max-w-6xl mx-auto px-4", isEditing && "cursor-pointer hover:bg-muted/50 transition-colors")}
     >
       <h2 className={cn("text-4xl text-center mb-16", preset.heading)}>{title}</h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
@@ -263,13 +285,12 @@ export const TestimonialsBlock = ({ title, testimonials, isEditing, style }: any
   const s = style || DEFAULT_STYLE;
   const { themePreset } = useBuilderStore();
   const preset = getPresetClasses(themePreset);
+  const anim = getAnimationProps(s);
 
   return (
     <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6 }}
-      className={cn(s.padding, s.bgColor, s.textColor, "max-w-6xl mx-auto px-4", isEditing && "cursor-pointer hover:bg-muted/50 rounded-md transition-colors")}
+      {...anim}
+      className={cn(s.padding, s.bgColor, s.textColor, s.borderRadius, s.shadow, "max-w-6xl mx-auto px-4", isEditing && "cursor-pointer hover:bg-muted/50 transition-colors")}
     >
       <h2 className={cn("text-4xl text-center mb-16", preset.heading)}>{title}</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
@@ -301,13 +322,12 @@ export const FAQBlock = ({ title, items, isEditing, style }: any) => {
   const s = style || DEFAULT_STYLE;
   const { themePreset } = useBuilderStore();
   const preset = getPresetClasses(themePreset);
+  const anim = getAnimationProps(s);
 
   return (
     <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6 }}
-      className={cn(s.padding, s.bgColor, s.textColor, "max-w-3xl mx-auto px-4", isEditing && "cursor-pointer hover:bg-muted/50 rounded-md transition-colors")}
+      {...anim}
+      className={cn(s.padding, s.bgColor, s.textColor, s.borderRadius, s.shadow, "max-w-3xl mx-auto px-4", isEditing && "cursor-pointer hover:bg-muted/50 transition-colors")}
     >
       <h2 className={cn("text-4xl text-center mb-16", preset.heading)}>{title}</h2>
       <div className="space-y-6">
@@ -338,13 +358,12 @@ export const NavbarBlock = ({ logo, links, isEditing, style }: any) => {
   const s = style || DEFAULT_STYLE;
   const { themePreset } = useBuilderStore();
   const preset = getPresetClasses(themePreset);
+  const anim = getAnimationProps(s);
 
   return (
     <motion.nav 
-      initial={{ opacity: 0, y: -20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6 }}
-      className={cn(s.padding, s.bgColor, s.textColor, "bg-background/80 backdrop-blur-md border-b sticky top-0 z-40 px-4 md:px-12", isEditing && "cursor-pointer hover:bg-muted/50 rounded-md transition-colors")}
+      {...anim}
+      className={cn(s.padding, s.bgColor, s.textColor, s.borderRadius, s.shadow, "bg-background/80 backdrop-blur-md border-b sticky top-0 z-40 px-4 md:px-12", isEditing && "cursor-pointer hover:bg-muted/50 transition-colors")}
     >
       <div className="flex items-center justify-between h-20">
         <div className={cn("text-2xl", preset.heading, "text-primary italic")}>{logo}</div>
@@ -405,13 +424,12 @@ export const FooterBlock = ({ text, links, isEditing, style }: any) => {
   const s = style || DEFAULT_STYLE;
   const { themePreset } = useBuilderStore();
   const preset = getPresetClasses(themePreset);
+  const anim = getAnimationProps(s);
 
   return (
     <motion.footer 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6 }}
-      className={cn(s.padding, s.bgColor, s.textColor, "border-t bg-muted/30", isEditing && "cursor-pointer hover:bg-muted/50 rounded-md transition-colors")}
+      {...anim}
+      className={cn(s.padding, s.bgColor, s.textColor, s.borderRadius, s.shadow, "border-t bg-muted/30", isEditing && "cursor-pointer hover:bg-muted/50 transition-colors")}
     >
       <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-10">
         <div className="text-sm text-muted-foreground font-medium">{text}</div>

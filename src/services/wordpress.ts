@@ -158,6 +158,21 @@ export async function publishToWordPress(
   // 1. Robust URL Validation
   let baseUrl = url.trim().replace(/\/$/, '');
   
+  const content = blocksToHtml(blocks);
+  const authHeader = btoa(`${username}:${appPassword}`);
+
+  const payload = {
+    title: options.title || 'AI Generated Page',
+    content: content,
+    status: 'publish',
+    meta: {
+      themePreset: options.themePreset,
+      pageTheme: options.pageTheme,
+      publishedAt: new Date().toISOString(),
+      blockCount: blocks.length
+    }
+  };
+
   // Handle Mock Mode
   if (baseUrl.toLowerCase() === 'mock') {
     console.log('--- MOCK PUBLISH START ---');
@@ -179,21 +194,6 @@ export async function publishToWordPress(
   // Try custom bridge endpoint first, fallback to standard pages endpoint
   const apiUrl = `${baseUrl}/wp-json/ai-builder/v1/publish`;
   const fallbackUrl = `${baseUrl}/wp-json/wp/v2/pages`;
-  
-  const content = blocksToHtml(blocks);
-  const authHeader = btoa(`${username}:${appPassword}`);
-
-  const payload = {
-    title: options.title || 'AI Generated Page',
-    content: content,
-    status: 'publish',
-    meta: {
-      themePreset: options.themePreset,
-      pageTheme: options.pageTheme,
-      publishedAt: new Date().toISOString(),
-      blockCount: blocks.length
-    }
-  };
 
   // 2. Retry Logic (3 attempts)
   let lastError: any;

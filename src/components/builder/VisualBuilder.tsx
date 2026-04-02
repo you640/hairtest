@@ -560,15 +560,111 @@ export function VisualBuilder() {
                   <h4 className="font-bold text-sm">Style</h4>
                   <div className="space-y-2">
                     <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Background Color (Tailwind class)</label>
+                    <div className="flex flex-wrap gap-1 mb-2">
+                      {['bg-background', 'bg-primary', 'bg-secondary', 'bg-muted', 'bg-accent', 'bg-black', 'bg-white'].map(c => (
+                        <button key={c} onClick={() => updateBlock(selectedBlock.id, {}, { bgColor: c })} className={cn("px-2 py-1 text-[10px] rounded border hover:bg-muted transition-colors", selectedBlock.style.bgColor === c && "bg-primary text-primary-foreground border-primary")}>
+                          {c.replace('bg-', '')}
+                        </button>
+                      ))}
+                    </div>
                     <input type="text" value={selectedBlock.style.bgColor} onChange={(e) => updateBlock(selectedBlock.id, {}, { bgColor: e.target.value })} className="w-full rounded-md border bg-background p-2 text-sm" />
                   </div>
                   <div className="space-y-2">
                     <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Text Color (Tailwind class)</label>
+                    <div className="flex flex-wrap gap-1 mb-2">
+                      {['text-foreground', 'text-primary-foreground', 'text-secondary-foreground', 'text-muted-foreground', 'text-primary', 'text-white', 'text-black'].map(c => (
+                        <button key={c} onClick={() => updateBlock(selectedBlock.id, {}, { textColor: c })} className={cn("px-2 py-1 text-[10px] rounded border hover:bg-muted transition-colors", selectedBlock.style.textColor === c && "bg-primary text-primary-foreground border-primary")}>
+                          {c.replace('text-', '')}
+                        </button>
+                      ))}
+                    </div>
                     <input type="text" value={selectedBlock.style.textColor} onChange={(e) => updateBlock(selectedBlock.id, {}, { textColor: e.target.value })} className="w-full rounded-md border bg-background p-2 text-sm" />
                   </div>
                   <div className="space-y-2">
                     <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Padding (Tailwind class)</label>
+                    <div className="flex flex-wrap gap-1 mb-2">
+                      {['p-0', 'p-4', 'p-8', 'p-12', 'p-16', 'p-20', 'p-24'].map(c => (
+                        <button key={c} onClick={() => updateBlock(selectedBlock.id, {}, { padding: c })} className={cn("px-2 py-1 text-[10px] rounded border hover:bg-muted transition-colors", selectedBlock.style.padding === c && "bg-primary text-primary-foreground border-primary")}>
+                          {c}
+                        </button>
+                      ))}
+                    </div>
                     <input type="text" value={selectedBlock.style.padding} onChange={(e) => updateBlock(selectedBlock.id, {}, { padding: e.target.value })} className="w-full rounded-md border bg-background p-2 text-sm" />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Border Radius (Tailwind class)</label>
+                    <div className="flex flex-wrap gap-1 mb-2">
+                      {['rounded-none', 'rounded-sm', 'rounded-md', 'rounded-lg', 'rounded-xl', 'rounded-2xl', 'rounded-full'].map(c => (
+                        <button key={c} onClick={() => updateBlock(selectedBlock.id, {}, { borderRadius: c })} className={cn("px-2 py-1 text-[10px] rounded border hover:bg-muted transition-colors", selectedBlock.style.borderRadius === c && "bg-primary text-primary-foreground border-primary")}>
+                          {c.replace('rounded-', '')}
+                        </button>
+                      ))}
+                    </div>
+                    <input type="text" value={selectedBlock.style.borderRadius} onChange={(e) => updateBlock(selectedBlock.id, {}, { borderRadius: e.target.value })} className="w-full rounded-md border bg-background p-2 text-sm" placeholder="rounded-none, rounded-md, rounded-full" />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Shadow (Tailwind class)</label>
+                    <div className="flex flex-wrap gap-1 mb-2">
+                      {['shadow-none', 'shadow-sm', 'shadow-md', 'shadow-lg', 'shadow-xl', 'shadow-2xl', 'shadow-inner'].map(c => (
+                        <button key={c} onClick={() => updateBlock(selectedBlock.id, {}, { shadow: c })} className={cn("px-2 py-1 text-[10px] rounded border hover:bg-muted transition-colors", selectedBlock.style.shadow === c && "bg-primary text-primary-foreground border-primary")}>
+                          {c.replace('shadow-', '')}
+                        </button>
+                      ))}
+                    </div>
+                    <input type="text" value={selectedBlock.style.shadow} onChange={(e) => updateBlock(selectedBlock.id, {}, { shadow: e.target.value })} className="w-full rounded-md border bg-background p-2 text-sm" placeholder="shadow-none, shadow-md, shadow-2xl" />
+                  </div>
+
+                  <div className="h-px bg-border my-4" />
+                  <div className="flex items-center gap-2 mb-2">
+                    <Sparkles className="h-4 w-4 text-primary" />
+                    <h4 className="font-bold text-sm">Entrance Animation</h4>
+                  </div>
+                  
+                  <div className="space-y-4 p-3 rounded-md bg-muted/30 border">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Animation Preset</label>
+                      <select 
+                        value={selectedBlock.style.animation || 'fade'} 
+                        onChange={(e) => updateBlock(selectedBlock.id, {}, { animation: e.target.value as any })}
+                        className="w-full rounded-md border bg-background p-2 text-xs focus:ring-1 focus:ring-primary outline-none"
+                      >
+                        <option value="none">None</option>
+                        <option value="fade">Fade In</option>
+                        <option value="slideUp">Slide Up</option>
+                        <option value="slideDown">Slide Down</option>
+                        <option value="slideLeft">Slide Left</option>
+                        <option value="slideRight">Slide Right</option>
+                        <option value="scale">Scale Up</option>
+                        <option value="rotate">Rotate & Scale</option>
+                      </select>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Duration (s)</label>
+                        <input 
+                          type="number" 
+                          step="0.1"
+                          min="0.1"
+                          max="5"
+                          value={selectedBlock.style.animationDuration || 0.5} 
+                          onChange={(e) => updateBlock(selectedBlock.id, {}, { animationDuration: parseFloat(e.target.value) })}
+                          className="w-full rounded-md border bg-background p-2 text-xs focus:ring-1 focus:ring-primary outline-none" 
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Delay (s)</label>
+                        <input 
+                          type="number" 
+                          step="0.1"
+                          min="0"
+                          max="10"
+                          value={selectedBlock.style.animationDelay || 0} 
+                          onChange={(e) => updateBlock(selectedBlock.id, {}, { animationDelay: parseFloat(e.target.value) })}
+                          className="w-full rounded-md border bg-background p-2 text-xs focus:ring-1 focus:ring-primary outline-none" 
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}
