@@ -258,7 +258,11 @@ export function VisualBuilder() {
 
     setIsPublishing(true);
     try {
-      await publishToWordPress(blocks, wpConfig);
+      await publishToWordPress(blocks, wpConfig, {
+        themePreset,
+        pageTheme,
+        title: 'AI Generated Page'
+      });
       alert("Successfully published to WordPress!");
     } catch (error: any) {
       alert(`Publishing failed: ${error.message}`);

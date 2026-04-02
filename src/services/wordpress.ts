@@ -6,6 +6,12 @@ export interface WordPressConfig {
   appPassword: string;
 }
 
+export interface WordPressPublishOptions {
+  themePreset?: string;
+  pageTheme?: string;
+  title?: string;
+}
+
 /**
  * Converts builder blocks to a Tailwind-styled HTML string for WordPress.
  */
@@ -136,41 +142,92 @@ function blocksToHtml(blocks: Block[]): string {
 }
 
 /**
- * Publishes the current page to WordPress via REST API.
+ * Publishes the current page to WordPress via REST API with enhanced production features.
  */
-export async function publishToWordPress(blocks: Block[], config: WordPressConfig) {
+export async function publishToWordPress(
+  blocks: Block[], 
+  config: WordPressConfig,
+  options: WordPressPublishOptions = {}
+) {
   const { url, username, appPassword } = config;
   
   if (!url || !username || !appPassword) {
     throw new Error('Missing WordPress configuration. Please check your settings.');
   }
 
-  // Clean URL (ensure no trailing slash)
-  const baseUrl = url.replace(/\/$/, '');
-  const apiUrl = `${baseUrl}/wp-json/wp/v2/pages`;
+  // 1. Robust URL Validation
+  let baseUrl = url.trim().replace(/\/$/, '');
+  if (!baseUrl.startsWith('http')) {
+    baseUrl = `https://${baseUrl}`;
+  }
+  
+  // Try custom bridge endpoint first, fallback to standard pages endpoint
+  const apiUrl = `${baseUrl}/wp-json/ai-builder/v1/publish`;
+  const fallbackUrl = `${baseUrl}/wp-json/wp/v2/pages`;
   
   const content = blocksToHtml(blocks);
-  
-  // Basic Auth header (Base64 encoded username:appPassword)
   const authHeader = btoa(`${username}:${appPassword}`);
 
-  const response = await fetch(apiUrl, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Basic ${authHeader}`
-    },
-    body: JSON.stringify({
-      title: 'AI Generated Page',
-      content: content,
-      status: 'publish' // Create as published page
-    })
-  });
+  const payload = {
+    title: options.title || 'AI Generated Page',
+    content: content,
+    status: 'publish',
+    meta: {
+      themePreset: options.themePreset,
+      pageTheme: options.pageTheme,
+      publishedAt: new Date().toISOString(),
+      blockCount: blocks.length
+    }
+  };
 
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.message || `WordPress API error: ${response.statusText}`);
+  // 2. Retry Logic (3 attempts)
+  let lastError: any;
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      console.log(`Publishing to WordPress (Attempt ${attempt}/3)...`);
+      
+      // Try custom bridge first
+      let response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Basic ${authHeader}`
+        },
+        body: JSON.stringify(payload)
+      });
+
+      // If bridge not found (404), fallback to standard API
+      if (response.status === 404) {
+        console.warn('Custom bridge plugin not detected, falling back to standard WP API.');
+        response = await fetch(fallbackUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Basic ${authHeader}`
+          },
+          body: JSON.stringify({
+            title: payload.title,
+            content: payload.content,
+            status: payload.status
+          })
+        });
+      }
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: response.statusText }));
+        throw new Error(errorData.message || `WordPress API error: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error: any) {
+      console.error(`Attempt ${attempt} failed:`, error.message);
+      lastError = error;
+      if (attempt < 3) {
+        // Wait before retry (exponential backoff)
+        await new Promise(resolve => setTimeout(resolve, attempt * 1000));
+      }
+    }
   }
 
-  return await response.json();
+  throw new Error(`Failed to publish after 3 attempts. Last error: ${lastError?.message}`);
 }
