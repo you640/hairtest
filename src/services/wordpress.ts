@@ -157,6 +157,21 @@ export async function publishToWordPress(
 
   // 1. Robust URL Validation
   let baseUrl = url.trim().replace(/\/$/, '');
+  
+  // Handle Mock Mode
+  if (baseUrl.toLowerCase() === 'mock') {
+    console.log('--- MOCK PUBLISH START ---');
+    console.log('Payload:', JSON.stringify(payload, null, 2));
+    await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate network delay
+    console.log('--- MOCK PUBLISH SUCCESS ---');
+    return {
+      success: true,
+      post_id: 12345,
+      url: 'https://mock-wordpress.test/ai-generated-page',
+      mock: true
+    };
+  }
+
   if (!baseUrl.startsWith('http')) {
     baseUrl = `https://${baseUrl}`;
   }

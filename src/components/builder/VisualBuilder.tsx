@@ -915,6 +915,29 @@ export function VisualBuilder() {
                   </button>
 
                   <button 
+                    onClick={async () => {
+                      setIsPublishing(true);
+                      try {
+                        const result = await publishToWordPress(blocks, { url: 'mock', username: 'test', appPassword: 'test' }, {
+                          themePreset,
+                          pageTheme,
+                          title: 'MOCK TEST PAGE'
+                        });
+                        alert(`MOCK SUCCESS!\n\nPost ID: ${result.post_id}\nURL: ${result.url}\n\nPozrite si konzolu (F12) pre detaily payloadu.`);
+                      } catch (e: any) {
+                        alert(`Mock failed: ${e.message}`);
+                      } finally {
+                        setIsPublishing(false);
+                      }
+                    }}
+                    disabled={isPublishing}
+                    className="w-full flex items-center justify-center gap-2 rounded-md border-2 border-dashed border-primary/30 bg-primary/5 py-3 text-sm font-bold text-primary hover:bg-primary/10 transition-all active:scale-95 disabled:opacity-50"
+                  >
+                    <Sparkles className="h-4 w-4" />
+                    Test with Mock Data
+                  </button>
+
+                  <button 
                     onClick={() => {
                       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(blocks, null, 2));
                       const downloadAnchorNode = document.createElement('a');
